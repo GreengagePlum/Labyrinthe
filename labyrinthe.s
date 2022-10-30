@@ -362,3 +362,51 @@ lw $ra, 8($sp)
 addi $sp, $sp, 12
 jr $ra
 ####################
+
+
+
+############################## Fonction creer_laby
+### 
+### Cette fonction prend en entrée un paramètre tel qu'un entier
+### qui indique la taille en cellules des cotés d'un labyrinthe carré.
+### Elle crée une pile et la remplit avec des cellules du labyrinthe
+### qui sont entourés de murs chacune.
+### 
+### Entrées : un entier n pour le nombre de cellules d'un coté ($a0)
+### Sorties : l'adresse de la pile représentant le labyrinthe ($v0)
+### 
+### Pré-conditions : n >= 2
+### Post-conditions : -
+### 
+creer_laby:
+# prologue
+addi $sp, $sp, -16
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $s0, 8($sp)
+sw $ra, 12($sp)
+# corps
+mul $a0, $a0, $a0			# calcul du nombre total de cellules -> $a0
+move $s0, $a0				# compteur de la boucle Loop1 pour remplir la pile avec des cellules -> $s0
+subi $s0, $s0, 2			# on supprime 2 car les cellules d'entrée et de sortie sont empilés hors boucle -> $s0
+jal st_creer				# création de la pile de taille n x n
+move $a0, $v0				# l'adresse de la pile créée -> $a0
+li $a1, 47				# paramètre de la fonction st_empiler, sa valeur indique la cellule de sortie -> $a1
+jal st_empiler				# la cellule de sortie empilée
+li $a1, 15				# paramètre de la fonction st_empiler, sa valeur indique des cellules autre que l'entrée et la sortie -> $a1
+Loop1_creer_laby:			# boucle pour remplir la pile des cellules autres que l'entrée et la sortie
+blez $s0, Exit_Loop1_creer_laby
+jal st_empiler				# empiler une cellule (n x n) - 2 fois
+subi $s0, $s0, 1			# décrémenter le compteur de boucle -> $s0
+b Loop1_creer_laby
+Exit_Loop1_creer_laby:
+li $a1, 31				# paramètre de la fonction st_empiler, sa valeur indique la cellule d'entrée -> $a1
+jal st_empiler				# empiler la cellule d'entrée
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $s0, 8($sp)
+lw $ra, 12($sp)
+addi $sp, $sp, 16
+jr $ra
+####################
