@@ -10,6 +10,7 @@ __start:
 
 
 
+
 ############################## Fonction cell_lecture_bit
 ### 
 ### Cette fonction prend en entrée deux paramètres tels qu'un entier
@@ -125,5 +126,35 @@ lw $a0, 0($sp)
 lw $a1, 4($sp)
 lw $ra, 8($sp)
 addi $sp, $sp, 12
+jr $ra
+####################
+
+
+
+############################## Fonction st_creer
+### 
+### Cette fonction prend en entrée un paramètre tel qu'un entier
+### et crée une représentation de pile sous forme d'un tableau d'entiers
+### de taille donnée en paramètre.
+### 
+### Entrées : un entier n représentant la taille ($a0)
+### Sorties : l'adresse de la pile alloué ($v0)
+### 
+### Pré-conditions : n > 0
+### Post-conditions : -
+### 
+st_creer:
+# prologue
+addi $sp, $sp, -8
+sw $a0, 0($sp)
+sw $ra, 4($sp)
+# corps
+mul $a0, $a0, 4	# convertir nombre d'entiers en nombre d'octets -> $a0
+li $v0, 9	# chargement du paramètre du syscall sbrk pour allouer la pile de taille n -> $v0
+syscall		# adresse de la pile alloué -> $v0
+# épilogue
+lw $a0, 0($sp)
+lw $ra, 4($sp)
+addi $sp, $sp, 8
 jr $ra
 ####################
