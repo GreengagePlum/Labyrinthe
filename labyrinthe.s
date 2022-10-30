@@ -135,7 +135,8 @@ jr $ra
 ### 
 ### Cette fonction prend en entrée un paramètre tel qu'un entier
 ### et crée une représentation de pile sous forme d'un tableau d'entiers
-### de taille donnée en paramètre.
+### de taille donnée en paramètre plus 2 pour accomoder les informations
+### sur la taille maximale et le nombre d'éléments actuel.
 ### 
 ### Entrées : un entier n représentant la taille ($a0)
 ### Sorties : l'adresse de la pile alloué ($v0)
@@ -149,9 +150,176 @@ addi $sp, $sp, -8
 sw $a0, 0($sp)
 sw $ra, 4($sp)
 # corps
-mul $a0, $a0, 4	# convertir nombre d'entiers en nombre d'octets -> $a0
-li $v0, 9	# chargement du paramètre du syscall sbrk pour allouer la pile de taille n -> $v0
-syscall		# adresse de la pile alloué -> $v0
+mul $a0, $a0, 4		# convertir nombre d'entiers en nombre d'octets -> $a0
+addi $a0, $a0, 8	# allocation pour 2 entiers de plus pour indiquer le nombre d'élements et la taille maximale de la pile -> $a0
+li $v0, 9		# chargement du paramètre du syscall sbrk pour allouer la pile de taille n -> $v0
+syscall			# adresse de la pile alloué -> $v0
+lw $a0, 0($sp)		# restaurer le paramètre de la taille en nombre d'entiers -> $a0
+sw $a0, 0($v0)		# enregistrer la taille maximale de la pile dans la pile elle-même -> 0($v0)
+li $t0, 0
+sw $t0, 4($v0)		# enregistrer le nombre d'éléments actuel de la pile dans la pile elle-même -> 4($v0)
+# épilogue
+lw $a0, 0($sp)
+lw $ra, 4($sp)
+addi $sp, $sp, 8
+jr $ra
+####################
+
+
+
+############################## Fonction st_est_vide
+### 
+### Cette fonction prend en entrée un paramètre tel que l'adresse
+### d'une pile et renvoie 1 si elle est vide et 0 sinon.
+### 
+### Entrées : l'adresse de la pile ($a0)
+### Sorties : booléen qui indique si la pile est vide ($v0)
+### 
+### Pré-conditions : -
+### Post-conditions : -
+### 
+st_est_vide:
+# prologue
+addi $sp, $sp, -8
+sw $a0, 0($sp)
+sw $ra, 4($sp)
+# corps
+lw $t0, 4($a0)			# chargement du nombre d'éléments de la pile -> $t0
+bnez $t0, Else_st_est_vide	# condition If pour vérifier si la pile est vide
+li $v0, 1			# s'il y a 0 éléments alors la pile est vide : 1 (vrai) -> $v0
+b Endif_st_est_vide
+Else_st_est_vide:
+li $v0, 0			# s'il y a autre que 0 éléments alors la pile n'est pas vide : 0 (faux) -> $v0
+Endif_st_est_vide:
+# épilogue
+lw $a0, 0($sp)
+lw $ra, 4($sp)
+addi $sp, $sp, 8
+jr $ra
+####################
+
+
+
+############################## Fonction st_est_pleine
+### 
+### Cette fonction prend en entrée un paramètre tel que l'adresse
+### d'une pile et renvoie 1 si elle est pleine et 0 sinon.
+### 
+### Entrées : l'adresse de la pile ($a0)
+### Sorties : booléen qui indique si la pile est pleine ($v0)
+### 
+### Pré-conditions : -
+### Post-conditions : -
+### 
+st_est_pleine:
+# prologue
+addi $sp, $sp, -8
+sw $a0, 0($sp)
+sw $ra, 4($sp)
+# corps
+lw $t0, 0($a0)				# chargement de la taille maximale de la pile -> $t0
+lw $t1, 4($a0)				# chargement du nombre d'éléments de la pile -> $t1
+bne $t0, $t1, Else_st_est_pleine	# condition If pour vérifier si la pile est pleine
+li $v0, 1				# si les deux nombres sont égaux alors la pile est pleine : 1 (vrai) -> $v0
+b Endif_st_est_pleine
+Else_st_est_pleine:
+li $v0, 0				# si les deux nombres sont différents alors la pile n'est pas pleine : 0 (faux) -> $v0
+Endif_st_est_pleine:
+# épilogue
+lw $a0, 0($sp)
+lw $ra, 4($sp)
+addi $sp, $sp, 8
+jr $ra
+####################
+
+
+
+############################## Fonction st_sommet
+### 
+### Cette fonction prend en entrée un paramètre tel que l'adresse d'une pile
+### et renvoie la valeur de l'élément le plus récent (le sommet) de la pile.
+### 
+### Entrées : l'adresse de la pile ($a0)
+### Sorties : la valeur du sommet de la pile ($v0)
+### 
+### Pré-conditions : La pile n'est pas vide
+### Post-conditions : -
+### 
+st_sommet:
+# prologue
+addi $sp, $sp, -8
+sw $a0, 0($sp)
+sw $ra, 4($sp)
+# corps
+lw $t0, 4($a0)		# chargement du nombre d'éléments de la pile -> $t0
+mul $t0, $t0, 4		# convertir le nombre d'éléments en nombre d'octets -> $t0
+addi $t0, $t0, 4	# ajout du décalage d'octets dû aux informations de taille stocké au début de la pile -> $t0
+add $t0, $t0, $a0	# calcul de l'adresse de l'élément le plus récent (le sommet) -> $t0
+lw $v0, 0($t0)		# mettre la valeur du sommet dans le registre de retour -> $v0
+# épilogue
+lw $a0, 0($sp)
+lw $ra, 4($sp)
+addi $sp, $sp, 8
+jr $ra
+####################
+
+
+
+############################## Fonction st_empiler
+### 
+### Cette fonction prend en entrée deux paramètres tel que l'adresse d'une pile
+### et un entier. Elle modifie la pile en ajoutant l'entier donné au sommet de la pile.
+### 
+### Entrées : l'adresse de la pile ($a0), un entier à empiler ($a1)
+### Sorties : -
+### 
+### Pré-conditions : La pile n'est pas pleine
+### Post-conditions : La pile donnée en argument est modifié
+### 
+st_empiler:
+# prologue
+addi $sp, $sp, -12
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $ra, 8($sp)
+# corps
+lw $t0, 4($a0)		# chargement du nombre d'éléments de la pile -> $t0
+mul $t1, $t0, 4		# convertir le nombre d'éléments en nombre d'octets -> $t1
+addi $t1, $t1, 8	# ajout du décalage d'octets dû aux informations de taille stocké au début de la pile -> $t1
+add $t1, $t1, $a0	# calcul de l'adresse qui vient après le sommet -> $t1
+sw $a1, 0($t1)		# écriture de l'entier donné en paramètre dans la pile -> 0($t1)
+addi $t0, $t0, 1	# incrementer le nombre d'éléments de la pile -> $t0
+sw $t0, 4($a0)		# écriture du nouveau nombre d'éléments dans la pile -> 4($a0)
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $ra, 8($sp)
+addi $sp, $sp, 12
+jr $ra
+####################
+
+
+
+############################## Fonction st_depiler
+### 
+### Cette fonction prend en entrée un paramètre tel que l'adresse d'une pile.
+### Elle modifie la pile en supprimant le sommet de la pile.
+### 
+### Entrées : l'adresse de la pile ($a0)
+### Sorties : -
+### 
+### Pré-conditions : La pile n'est pas vide
+### Post-conditions : La pile donnée en argument est modifié
+### 
+st_depiler:
+# prologue
+addi $sp, $sp, -8
+sw $a0, 0($sp)
+sw $ra, 4($sp)
+# corps
+lw $t0, 4($a0)		# chargement du nombre d'éléments de la pile -> $t0
+subi $t0, $t0, 1	# désincrementer le nombre d'éléments de la pile -> $t0
+sw $t0, 4($a0)		# écriture du nouveau nombre d'éléments dans la pile -> 4($a0)
 # épilogue
 lw $a0, 0($sp)
 lw $ra, 4($sp)
