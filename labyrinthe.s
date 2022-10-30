@@ -275,19 +275,21 @@ jr $ra
 ### 
 st_sommet:
 # prologue
-addi $sp, $sp, -8
+addi $sp, $sp, -12
 sw $a0, 0($sp)
-sw $ra, 4($sp)
+sw $s0, 4($sp)
+sw $ra, 8($sp)
 # corps
-lw $t0, 4($a0)		# chargement du nombre d'éléments de la pile -> $t0
-mul $t0, $t0, 4		# convertir le nombre d'éléments en nombre d'octets -> $t0
-addi $t0, $t0, 4	# ajout du décalage d'octets dû aux informations de taille stocké au début de la pile -> $t0
-add $t0, $t0, $a0	# calcul de l'adresse de l'élément le plus récent (le sommet) -> $t0
-lw $v0, 0($t0)		# mettre la valeur du sommet dans le registre de retour -> $v0
+lw $s0, 4($a0)		# chargement du nombre d'éléments de la pile -> $s0
+mul $s0, $s0, 4		# convertir le nombre d'éléments en nombre d'octets -> $s0
+addi $s0, $s0, 4	# ajout du décalage d'octets dû aux informations de taille stocké au début de la pile -> $s0
+add $s0, $s0, $a0	# calcul de l'adresse de l'élément le plus récent (le sommet) -> $s0
+lw $v0, 0($s0)		# mettre la valeur du sommet dans le registre de retour -> $v0
 # épilogue
 lw $a0, 0($sp)
-lw $ra, 4($sp)
-addi $sp, $sp, 8
+lw $s0, 4($sp)
+lw $ra, 8($sp)
+addi $sp, $sp, 12
 jr $ra
 ####################
 
