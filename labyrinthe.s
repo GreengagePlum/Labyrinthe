@@ -237,13 +237,15 @@ jr $ra
 ### 
 st_est_pleine:
 # prologue
-addi $sp, $sp, -8
+addi $sp, $sp, -16
 sw $a0, 0($sp)
-sw $ra, 4($sp)
+sw $s0, 4($sp)
+sw $s1, 8($sp)
+sw $ra, 12($sp)
 # corps
-lw $t0, 0($a0)				# chargement de la taille maximale de la pile -> $t0
-lw $t1, 4($a0)				# chargement du nombre d'éléments de la pile -> $t1
-bne $t0, $t1, Else_st_est_pleine	# condition If pour vérifier si la pile est pleine
+lw $s0, 0($a0)				# chargement de la taille maximale de la pile -> $s0
+lw $s1, 4($a0)				# chargement du nombre d'éléments de la pile -> $s1
+bne $s0, $s1, Else_st_est_pleine	# condition If pour vérifier si la pile est pleine
 li $v0, 1				# si les deux nombres sont égaux alors la pile est pleine : 1 (vrai) -> $v0
 b Endif_st_est_pleine
 Else_st_est_pleine:
@@ -251,8 +253,10 @@ li $v0, 0				# si les deux nombres sont différents alors la pile n'est pas plei
 Endif_st_est_pleine:
 # épilogue
 lw $a0, 0($sp)
-lw $ra, 4($sp)
-addi $sp, $sp, 8
+lw $s0, 4($sp)
+lw $s1, 8($sp)
+lw $ra, 12($sp)
+addi $sp, $sp, 16
 jr $ra
 ####################
 
