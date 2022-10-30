@@ -61,20 +61,24 @@ jr $ra
 ### 
 cell_mettre_bit_a1:
 # prologue
-addi $sp, $sp, -12
+addi $sp, $sp, -20
 sw $a0, 0($sp)
 sw $a1, 4($sp)
-sw $ra, 8($sp)
+sw $s0, 8($sp)
+sw $s1, 12($sp)
+sw $ra, 16($sp)
 # corps
-li $t0, 1
-sllv $t0, $t0, $a1	# construire nombre binaire avec le bit numéro i = 1 -> $t0
-or $t1, $a0, $t0	# remplacer le bit numéro i par 1 -> $t1
-move $v0, $t1		# mettre le résultat dans le registre de retour -> $v0
+li $s0, 1
+sllv $s0, $s0, $a1	# construire nombre binaire avec le bit numéro i = 1 -> $s0
+or $s1, $a0, $s0	# remplacer le bit numéro i par 1 -> $s1
+move $v0, $s1		# mettre le résultat dans le registre de retour -> $v0
 # épilogue
 lw $a0, 0($sp)
 lw $a1, 4($sp)
-lw $ra, 8($sp)
-addi $sp, $sp, 12
+lw $s0, 8($sp)
+lw $s1, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
 jr $ra
 ####################
 
