@@ -166,9 +166,10 @@ jr $ra
 ### 
 st_creer:
 # prologue
-addi $sp, $sp, -8
+addi $sp, $sp, -12
 sw $a0, 0($sp)
-sw $ra, 4($sp)
+sw $s0, 4($sp)
+sw $ra, 8($sp)
 # corps
 mul $a0, $a0, 4		# convertir nombre d'entiers en nombre d'octets -> $a0
 addi $a0, $a0, 8	# allocation pour 2 entiers de plus pour indiquer le nombre d'élements et la taille maximale de la pile -> $a0
@@ -176,12 +177,13 @@ li $v0, 9		# chargement du paramètre du syscall sbrk pour allouer la pile de ta
 syscall			# adresse de la pile alloué -> $v0
 lw $a0, 0($sp)		# restaurer le paramètre de la taille en nombre d'entiers -> $a0
 sw $a0, 0($v0)		# enregistrer la taille maximale de la pile dans la pile elle-même -> 0($v0)
-li $t0, 0
-sw $t0, 4($v0)		# enregistrer le nombre d'éléments actuel de la pile dans la pile elle-même -> 4($v0)
+li $s0, 0
+sw $s0, 4($v0)		# enregistrer le nombre d'éléments actuel de la pile dans la pile elle-même -> 4($v0)
 # épilogue
 lw $a0, 0($sp)
-lw $ra, 4($sp)
-addi $sp, $sp, 8
+lw $s0, 4($sp)
+lw $ra, 8($sp)
+addi $sp, $sp, 12
 jr $ra
 ####################
 
