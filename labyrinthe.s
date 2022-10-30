@@ -98,42 +98,54 @@ jr $ra
 ### 
 cell_mettre_bit_a0:
 # prologue
-addi $sp, $sp, -12
+addi $sp, $sp, -36
 sw $a0, 0($sp)
 sw $a1, 4($sp)
-sw $ra, 8($sp)
+sw $s0, 8($sp)
+sw $s1, 12($sp)
+sw $s2, 16($sp)
+sw $s3, 20($sp)
+sw $s4, 24($sp)
+sw $s5, 28($sp)
+sw $ra, 32($sp)
 # corps
-li $t0, 7					# compteur du Loop1 (modifier au besoin : compteur = nombreDeBitsRepresentifs - 1) -> $t0
-sub $t1, $t0, $a1
-subi $t1, $t1, 1				# condition du if dans Loop1 -> $t1
-li $t2, 1
+li $s0, 7					# compteur du Loop1 (modifier au besoin : compteur = nombreDeBitsRepresentifs - 1) -> $s0
+sub $s1, $s0, $a1
+subi $s1, $s1, 1				# condition du if dans Loop1 -> $s1
+li $s2, 1
 Loop1_cell_mettre_bit_a0:
-beqz $t0, Exit_Loop1_cell_mettre_bit_a0		# boucle de construction du début du filtre "and" à utiliser pour changer le bit i en 0 -> $t2
-sll $t2, $t2, 1					# remplissage avec des 1 les bits à gauche du bit numéro i -> $t2
-sub $t0, $t0, 1					# décrementation compteur Loop1 -> $t0
-sub $t1, $t1, 1					# décrementation condition if -> $t1
-bltz $t1, Loop1_cell_mettre_bit_a0		# condition pour laisser le bit numéro i = 0
-addi $t2, $t2, 1				# remplissage avec des 1 les bits à gauche du bit numéro i -> $t2
+beqz $s0, Exit_Loop1_cell_mettre_bit_a0		# boucle de construction du début du filtre "and" à utiliser pour changer le bit i en 0 -> $s2
+sll $s2, $s2, 1					# remplissage avec des 1 les bits à gauche du bit numéro i -> $s2
+sub $s0, $s0, 1					# décrementation compteur Loop1 -> $s0
+sub $s1, $s1, 1					# décrementation condition if -> $s1
+bltz $s1, Loop1_cell_mettre_bit_a0		# condition pour laisser le bit numéro i = 0
+addi $s2, $s2, 1				# remplissage avec des 1 les bits à gauche du bit numéro i -> $s2
 b Loop1_cell_mettre_bit_a0
 Exit_Loop1_cell_mettre_bit_a0:
-move $t1, $a1					# compteur du Loop2 -> $t1
-sub $t1, $t1, 1
-li $t3, 1
-Loop2_cell_mettre_bit_a0:			# boucle de construction de la fin du filtre "and" à utiliser pour changer le bit i en 0 -> $t3
-blez $t1, Exit_Loop2_cell_mettre_bit_a0
-sll $t3, $t3, 1
-addi $t3, $t3, 1				# remplissage des bits à droite du bit numéro i par des 1 -> $t3
-sub $t1, $t1, 1
+move $s1, $a1					# compteur du Loop2 -> $s1
+sub $s1, $s1, 1
+li $s3, 1
+Loop2_cell_mettre_bit_a0:			# boucle de construction de la fin du filtre "and" à utiliser pour changer le bit i en 0 -> $s3
+blez $s1, Exit_Loop2_cell_mettre_bit_a0
+sll $s3, $s3, 1
+addi $s3, $s3, 1				# remplissage des bits à droite du bit numéro i par des 1 -> $s3
+sub $s1, $s1, 1
 b Loop2_cell_mettre_bit_a0
 Exit_Loop2_cell_mettre_bit_a0:
-add $t4, $t2, $t3				# combinaison des deux parties "debut" et "fin" du filtre "and" à utiliser -> $t4
-and $t5, $a0, $t4				# mettre à 0 le bit i de l'entier n de départ en utilisant le filtre "and" qui n'a seulement le bit i qui est égale à 0 tous les autres 1 -> $t5
-move $v0, $t5					# mettre le résultat dans le registre de retour -> $v0
+add $s4, $s2, $s3				# combinaison des deux parties "debut" et "fin" du filtre "and" à utiliser -> $s4
+and $s5, $a0, $s4				# mettre à 0 le bit i de l'entier n de départ en utilisant le filtre "and" qui n'a seulement le bit i qui est égale à 0 tous les autres 1 -> $s5
+move $v0, $s5					# mettre le résultat dans le registre de retour -> $v0
 # épilogue
 lw $a0, 0($sp)
 lw $a1, 4($sp)
-lw $ra, 8($sp)
-addi $sp, $sp, 12
+lw $s0, 8($sp)
+lw $s1, 12($sp)
+lw $s2, 16($sp)
+lw $s3, 20($sp)
+lw $s4, 24($sp)
+lw $s5, 28($sp)
+lw $ra, 32($sp)
+addi $sp, $sp, 36
 jr $ra
 ####################
 
