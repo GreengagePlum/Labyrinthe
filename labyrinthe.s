@@ -202,12 +202,13 @@ jr $ra
 ### 
 st_est_vide:
 # prologue
-addi $sp, $sp, -8
+addi $sp, $sp, -12
 sw $a0, 0($sp)
-sw $ra, 4($sp)
+sw $s0, 4($sp)
+sw $ra, 8($sp)
 # corps
-lw $t0, 4($a0)			# chargement du nombre d'éléments de la pile -> $t0
-bnez $t0, Else_st_est_vide	# condition If pour vérifier si la pile est vide
+lw $s0, 4($a0)			# chargement du nombre d'éléments de la pile -> $s0
+bnez $s0, Else_st_est_vide	# condition If pour vérifier si la pile est vide
 li $v0, 1			# s'il y a 0 éléments alors la pile est vide : 1 (vrai) -> $v0
 b Endif_st_est_vide
 Else_st_est_vide:
@@ -215,8 +216,9 @@ li $v0, 0			# s'il y a autre que 0 éléments alors la pile n'est pas vide : 0 (
 Endif_st_est_vide:
 # épilogue
 lw $a0, 0($sp)
-lw $ra, 4($sp)
-addi $sp, $sp, 8
+lw $s0, 4($sp)
+lw $ra, 8($sp)
+addi $sp, $sp, 12
 jr $ra
 ####################
 
