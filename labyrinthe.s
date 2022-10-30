@@ -308,23 +308,27 @@ jr $ra
 ### 
 st_empiler:
 # prologue
-addi $sp, $sp, -12
+addi $sp, $sp, -20
 sw $a0, 0($sp)
 sw $a1, 4($sp)
-sw $ra, 8($sp)
+sw $s0, 8($sp)
+sw $s1, 12($sp)
+sw $ra, 16($sp)
 # corps
-lw $t0, 4($a0)		# chargement du nombre d'éléments de la pile -> $t0
-mul $t1, $t0, 4		# convertir le nombre d'éléments en nombre d'octets -> $t1
-addi $t1, $t1, 8	# ajout du décalage d'octets dû aux informations de taille stocké au début de la pile -> $t1
-add $t1, $t1, $a0	# calcul de l'adresse qui vient après le sommet -> $t1
-sw $a1, 0($t1)		# écriture de l'entier donné en paramètre dans la pile -> 0($t1)
-addi $t0, $t0, 1	# incrementer le nombre d'éléments de la pile -> $t0
-sw $t0, 4($a0)		# écriture du nouveau nombre d'éléments dans la pile -> 4($a0)
+lw $s0, 4($a0)		# chargement du nombre d'éléments de la pile -> $s0
+mul $s1, $s0, 4		# convertir le nombre d'éléments en nombre d'octets -> $s1
+addi $s1, $s1, 8	# ajout du décalage d'octets dû aux informations de taille stocké au début de la pile -> $s1
+add $s1, $s1, $a0	# calcul de l'adresse qui vient après le sommet -> $s1
+sw $a1, 0($s1)		# écriture de l'entier donné en paramètre dans la pile -> 0($t1)
+addi $s0, $s0, 1	# incrementer le nombre d'éléments de la pile -> $s0
+sw $s0, 4($a0)		# écriture du nouveau nombre d'éléments dans la pile -> 4($a0)
 # épilogue
 lw $a0, 0($sp)
 lw $a1, 4($sp)
-lw $ra, 8($sp)
-addi $sp, $sp, 12
+lw $s0, 8($sp)
+lw $s1, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
 jr $ra
 ####################
 
