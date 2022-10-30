@@ -347,16 +347,18 @@ jr $ra
 ### 
 st_depiler:
 # prologue
-addi $sp, $sp, -8
+addi $sp, $sp, -12
 sw $a0, 0($sp)
-sw $ra, 4($sp)
+sw $s0, 4($sp)
+sw $ra, 8($sp)
 # corps
-lw $t0, 4($a0)		# chargement du nombre d'éléments de la pile -> $t0
-subi $t0, $t0, 1	# désincrementer le nombre d'éléments de la pile -> $t0
-sw $t0, 4($a0)		# écriture du nouveau nombre d'éléments dans la pile -> 4($a0)
+lw $s0, 4($a0)		# chargement du nombre d'éléments de la pile -> $s0
+subi $s0, $s0, 1	# désincrementer le nombre d'éléments de la pile -> $s0
+sw $s0, 4($a0)		# écriture du nouveau nombre d'éléments dans la pile -> 4($a0)
 # épilogue
 lw $a0, 0($sp)
-lw $ra, 4($sp)
-addi $sp, $sp, 8
+lw $s0, 4($sp)
+lw $ra, 8($sp)
+addi $sp, $sp, 12
 jr $ra
 ####################
