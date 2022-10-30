@@ -25,19 +25,23 @@ __start:
 ### 
 cell_lecture_bit:
 # prologue
-addi $sp, $sp, -12
+addi $sp, $sp, -20
 sw $a0, 0($sp)
 sw $a1, 4($sp)
-sw $ra, 8($sp)
+sw $s0, 8($sp)
+sw $s1, 12($sp)
+sw $ra, 16($sp)
 # corps
-srlv $t0, $a0, $a1	# décalage de bits de n à droite de i fois -> $t0
-and $t1, $t0, 1		# déterminer si le bit recherché est 1 ou 0 -> $t1
-move $v0, $t1		# mettre le résultat dans le registre de retour -> $v0
+srlv $s0, $a0, $a1	# décalage de bits de n à droite de i fois -> $s0
+and $s1, $s0, 1		# déterminer si le bit recherché est 1 ou 0 -> $s1
+move $v0, $s1		# mettre le résultat dans le registre de retour -> $v0
 # épilogue
 lw $a0, 0($sp)
 lw $a1, 4($sp)
-lw $ra, 8($sp)
-addi $sp, $sp, 12
+lw $s0, 8($sp)
+lw $s1, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
 jr $ra
 ####################
 
