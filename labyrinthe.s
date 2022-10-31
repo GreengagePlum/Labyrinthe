@@ -597,7 +597,7 @@ jr $ra
 
 ############################## Fonction lecture_cellule
 ### 
-### Cette fonction prend argument deux paramètres tels que l'adresse d'une 
+### Cette fonction prend en paramètre deux arguments tels que l'adresse d'une 
 ### pile qui représente un labyrinthe et l'indice d'une des cellules de ceci. 
 ### Elle renvoie la valeur de la cellule souhaité.
 ### 
@@ -633,5 +633,52 @@ lw $a1, 4($sp)
 lw $s0, 8($sp)
 lw $ra, 12($sp)
 addi $sp, $sp, 16
+jr $ra
+####################
+
+
+
+############################## Fonction modifier_cellule
+### 
+### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une 
+### pile qui représente un labyrinthe, l'indice d'une des cellules de ceci et
+### un entier k. Elle remplace la valeur de la cellule souhaité par l'entier k.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule n ($a1), un entier k ($a2)
+### Sorties : -
+### 
+### Pré-conditions : 0 <= n <= taille maximale labyrinthe - 1, 0 <= k <= 99
+### Post-conditions : La pile qui représente le labyrinthe est modifié
+### 
+modifier_cellule:
+# prologue
+addi $sp, $sp, -20
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $a2, 8($sp)
+sw $s0, 12($sp)
+sw $ra, 16($sp)
+# corps
+bgez $a1, Else_modifier_cellule		# condition de cas de base pour la récursivité
+move $a1, $a2
+jal st_empiler				# rempalcement de la valeur à l'indice n par l'entier k
+b Endif_modifier_cellule
+Else_modifier_cellule:
+jal st_sommet				# on prend le sommet pour l'empiler et rendre la pile à la fin en bon état
+move $s0, $v0				# sauvegarde de la valeur du sommet pour ne pas écraser -> $s0
+jal st_depiler				# depiler pour arriver à un cas plus petit
+subi $a1, $a1, 1			# décrémenter l'indice de la cellule -> $a1
+jal modifier_cellule			# appel récursif pour continuer à dépiler jusqu'à retrouver la cellule recherché
+bltz $a1, Endif_modifier_cellule	# condition pour empiler que les cellules qui n'avaient pas l'indice n comme indice
+move $a1, $s0				# paramètre de la fonction st_empiler, le sommet -> $a0
+jal st_empiler				# empiler le sommet qui était dépilé avant
+Endif_modifier_cellule:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $a2, 8($sp)
+lw $s0, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
 jr $ra
 ####################
