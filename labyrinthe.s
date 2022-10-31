@@ -592,3 +592,46 @@ lw $ra, 12($sp)
 addi $sp, $sp, 16
 jr $ra
 ####################
+
+
+
+############################## Fonction lecture_cellule
+### 
+### Cette fonction prend argument deux paramètres tels que l'adresse d'une 
+### pile qui représente un labyrinthe et l'indice d'une des cellules de ceci. 
+### Elle renvoie la valeur de la cellule souhaité.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule n ($a1)
+### Sorties : la valeur de la cellule ($v0)
+### 
+### Pré-conditions : 0 <= n <= taille maximale labyrinthe - 1
+### Post-conditions : -
+### 
+lecture_cellule:
+# prologue
+addi $sp, $sp, -16
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $s0, 8($sp)
+sw $ra, 12($sp)
+# corps
+bgtz $a1, Else_lecture_cellule		# condition de cas de base pour la récursivité
+jal st_sommet				# si on arrive à l'indice de la cellule rechercé, prend sa valeur
+b Endif_lecture_cellule
+Else_lecture_cellule:
+jal st_sommet				# sinon on prend quand même le sommet pour l'empiler et rendre la pile à la fin en bon état
+move $s0, $v0				# sauvegarde de la valeur du sommet pour ne pas écraser -> $s0
+jal st_depiler				# depiler pour arriver à un cas plus petit
+subi $a1, $a1, 1			# décrémenter l'indice de la cellule -> $a1
+jal lecture_cellule			# appel récursif pour continuer à dépiler jusqu'à retrouver la cellule recherché
+move $a1, $s0				# paramètre de la fonction st_empiler, le sommet -> $a0
+jal st_empiler				# empiler le sommet qui était dépilé avant
+Endif_lecture_cellule:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $s0, 8($sp)
+lw $ra, 12($sp)
+addi $sp, $sp, 16
+jr $ra
+####################
