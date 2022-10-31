@@ -1,9 +1,12 @@
 .data
+Espace: 	.asciiz " "
+NouvLigne:	.asciiz "\n"
 
 .text
 .globl __start
 
 __start:
+
 
 
 
@@ -406,6 +409,185 @@ jal st_empiler				# empiler la cellule d'entrée
 lw $a0, 0($sp)
 lw $a1, 4($sp)
 lw $s0, 8($sp)
+lw $ra, 12($sp)
+addi $sp, $sp, 16
+jr $ra
+####################
+
+
+
+############################## Fonction afficher_laby
+### 
+### Cette fonction prend en paramètre l'adresse d'une pile
+### qui représente un labyrinthe et affiche ce dernier.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0)
+### Sorties : -
+### 
+### Pré-conditions : 2 <= taille d'une ligne ou colonne <= 99
+### Post-conditions : Affichage des nombres
+### 
+afficher_laby:
+# prologue
+addi $sp, $sp, -8
+sw $a0, 0($sp)
+sw $ra, 4($sp)
+# corps
+move $s0, $a0			# copier l'adresse de la pile pour ne pas l'écraser -> $s0
+lw $a0, 0($s0)			# charger le nombre total de cellules du labyrinthe -> $a0
+jal racine_carre		# calcul de la racine carré du nombre total de cellules pour trouver la taille d'une ligne
+move $s1, $v0			# taille d'une ligne du labyrinthe -> $s1
+move $a0, $s1			# préparation du paramètre de la fonction afficher_taille_laby -> $a0
+jal afficher_taille_laby	# affichage de la taille du labyrinthe sur la première ligne
+lw $a0, 0($sp)			# restaurer l'adresse de la pile -> $a0
+move $a1, $s1			# préparation du paramètre de la fonction afficher_contenu_laby
+jal afficher_contenu_laby	# affichage des cellules du labyrinthe ligne par ligne
+# épilogue
+lw $a0, 0($sp)
+lw $ra, 4($sp)
+addi $sp, $sp, 8
+jr $ra
+####################
+
+
+
+############################## Fonction afficher_taille_laby
+### 
+### Cette fonction prend en paramètre la taille d'un coté
+### d'un labyrinthe et l'affiche sur la première ligne.
+### 
+### Entrées : la taille d'un coté d'un labyrinthe n ($a0)
+### Sorties : -
+### 
+### Pré-conditions : 0 <= n <= 99
+### Post-conditions : Affichage des nombres
+### 
+afficher_taille_laby:
+# prologue
+addi $sp, $sp, -8
+sw $a0, 0($sp)
+sw $ra, 4($sp)
+# corps
+bge $a0, 10, Endif_afficher_taille_laby		# verifier si la cellule est un nombre à un chiffre
+li $a0, 0					# si oui, affichage de 0 à gauche pour alignement
+li $v0, 1
+syscall
+lw $a0, 0($sp)
+Endif_afficher_taille_laby:
+li $v0, 1					# affichage de la cellule
+syscall
+la $a0, NouvLigne				# affichage d'un caractère de saut de ligne après le nombre pour passer à la ligne suivante
+li $v0, 4
+syscall
+# épilogue
+lw $a0, 0($sp)
+lw $ra, 4($sp)
+addi $sp, $sp, 8
+jr $ra
+####################
+
+
+
+############################## Fonction afficher_contenu_laby
+### 
+### Cette fonction prend en paramètre l'adresse d'une pile
+### qui représente un labyrinthe et la longueur d'une de ses
+### lignes. Elle affiche le labyrinthe ligne par ligne.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), la taille d'un coté n ($a1)
+### Sorties : -
+### 
+### Pré-conditions : 2 <= n <= 99
+### Post-conditions : Affichage des nombres
+### 
+afficher_contenu_laby:
+# prologue
+addi $sp, $sp, -16
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $s0, 8($sp)
+sw $ra, 12($sp)
+# corps
+jal st_est_vide
+bnez $v0, Exit_afficher_contenu_laby		# condition de récursivité du cas base : la pile est-elle vide ?
+jal st_sommet
+move $s0, $v0					# sommet de la pile (première cellule du labyrinthe) -> $s0
+bge $s0, 10, Endif1_afficher_contenu_laby	# verifier si la cellule est un nombre à un chiffre
+li $a0, 0					# si oui, affichage de 0 à gauche pour alignement
+li $v0, 1
+syscall
+Endif1_afficher_contenu_laby:
+move $a0, $s0					# affichage de la cellule
+li $v0, 1
+syscall
+ble $a1, 1, Else2_afficher_contenu_laby		# condition pour vérifier s'il faut mettre un espace ou un saut de ligne après le nombre
+la $a0, Espace					# affichage d'un espace après le nombre
+li $v0, 4
+syscall
+subi $a1, $a1, 1				# décrementer la taille de ligne qui indique si on est à la fin d'une ligne -> $a1
+b Endif2_afficher_contenu_laby
+Else2_afficher_contenu_laby:
+la $a0, NouvLigne				# affichage d'un caractère de saut de ligne après le nombre pour passer à la ligne suivante
+li $v0, 4
+syscall
+lw $a0, 0($sp)					# restaurer l'adresse de la pile -> $a0
+lw $a1, 0($a0)					# charger la taille de la pile -> $a1
+move $a0, $a1					# passer la taille de la pile en paramètre pour la fonction racine carré -> $a0
+jal racine_carre
+move $a1, $v0					# calcul de la longueur d'une ligne de départ pour recommencer une nouvelle ligne -> $a1
+Endif2_afficher_contenu_laby:
+lw $a0, 0($sp)					# restaurer l'adresse de la pile -> $a0
+jal st_depiler					# passer au cas plus petit d'un cran pour préparer l'appel récursive
+jal afficher_contenu_laby			# appel récursive pour afficher tous les nombres jusqu'à arriver à pile vide
+move $a1, $s0					# préparer le paramètre de la fonction st_empiler avec le sommet de la pile -> $a1
+jal st_empiler					# empiler le sommet qui était dépilé avant pour reconstruire la pile du début
+Exit_afficher_contenu_laby:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $s0, 8($sp)
+lw $ra, 12($sp)
+addi $sp, $sp, 16
+jr $ra
+####################
+
+
+
+############################## Fonction racine_carre
+###
+### Inspiré par https://www.educba.com/square-root-in-c/
+### 
+### Cette fonction prend la racine carré d'un entier
+### donné en paramètre. 
+### 
+### Entrées : un entier n ($a0)
+### Sorties : un entier r ($v0)
+### 
+### Pré-conditions : n >= 0
+### Post-conditions : -
+### 
+racine_carre:
+# prologue
+addi $sp, $sp, -16
+sw $a0, 0($sp)
+sw $s0, 4($sp)
+sw $s1, 8($sp)
+sw $ra, 12($sp)
+# corps
+li $s0, 1				# initalisation du compteur pour la boucle -> $s0
+li $s1, 1				# initalisation de la variable pour calculer le carré des nombres -> $s1
+Loop_racine_carre:			# boucle pour trouver la racine carré d'un nombre en essayant chaque nombre
+bgt $s1, $a0, Exit_Loop_racine_carre	# si le carré qu'on a calculé dépasse le nombre de départ on arrête la boucle
+addi $s0, $s0, 1			# sinon on increment le compteur -> $s0
+mul $s1, $s0, $s0			# on calcule le carré du compteur -> $s1
+b Loop_racine_carre
+Exit_Loop_racine_carre:
+subi $s0, $s0, 1			# soustraction de 1 du résultat pour accomoder le dépassement d'un nombre dans la boucle -> $s0
+move $v0, $s0				# mettre le résultat dans le registre de retour -> $v0
+# épilogue
+lw $a0, 0($sp)
+lw $s0, 4($sp)
+lw $s1, 8($sp)
 lw $ra, 12($sp)
 addi $sp, $sp, 16
 jr $ra
