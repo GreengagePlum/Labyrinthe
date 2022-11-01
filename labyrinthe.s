@@ -3,10 +3,9 @@ Espace: 	.asciiz " "
 NouvLigne:	.asciiz "\n"
 
 .text
-.globl __start
+.globl __main
 
-__start:
-
+__main:
 
 
 
@@ -953,7 +952,7 @@ sw $s0, 8($sp)
 sw $s1, 12($sp)
 sw $ra, 16($sp)
 # corps
-move $a0, $a1
+move $a0, $a1						# l'adresse de la pile -> $a0
 jal st_est_vide
 beq $v0, 1, Exit_enlever_voisin_visite_cellule		# condition pour vérifier si la pile des indices est vide
 jal st_sommet
@@ -971,7 +970,8 @@ lw $a0, 0($sp)						# restaurer l'adresse du labyrinthe -> $a0
 lw $a1, 4($sp)						# restaurer l'adresse de la pile -> $a1
 jal enlever_voisin_visite_cellule			# appel récursif
 beq $s1, 1, Exit_enlever_voisin_visite_cellule		# empiler l'élément dépilé seulement si c'était une cellule non visité
-move $a1, $s0
+move $a0, $a1						# l'adresse de la pile -> $a0
+move $a1, $s0						# l'élément dépile auparavant -> $a1
 jal st_empiler
 Exit_enlever_voisin_visite_cellule:
 # épilogue
@@ -981,5 +981,51 @@ lw $s0, 8($sp)
 lw $s1, 12($sp)
 lw $ra, 16($sp)
 addi $sp, $sp, 20
+jr $ra
+####################
+
+
+
+############################## Fonction tirer_hasard_cellule
+### 
+### Cette fonction prend en paramètre un argument tel que l'adresse d'une pile qui contient des indices.
+### Elle choisit un indice au hasard et le renvoi.
+### 
+### Entrées : l'adresse d'une pile ($a0)
+### Sorties : l'indice d'une cellule ($v0)
+### 
+### Pré-conditions : -
+### Post-conditions : Si la pile est vide, l'indice -1 est renvoyé
+### 
+tirer_hasard_cellule:
+# prologue
+addi $sp, $sp, -16
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $s0, 8($sp)
+sw $ra, 12($sp)
+# corps
+lw $s0, 4($a0)					# chargement de la taille de la pile -> $s0
+bne $s0, 0, Elseif1_tirer_hasard_cellule	# condition pour vérifier si la pile est vide
+li $v0, -1					# si oui renvoie de l'indice invalide -1 -> $v0
+b Endif_tirer_hasard_cellule
+Elseif1_tirer_hasard_cellule:
+bne $s0, 1, Elseif2_tirer_hasard_cellule	# condition pour vérifier si la pile n'a qu'un seul élément
+jal st_sommet					# si oui renvoie de cet élément -> $v0
+b Endif_tirer_hasard_cellule
+Elseif2_tirer_hasard_cellule:
+li $a0, 0					# borne inférieure pour le calcul d'un nombre aléatoire -> $a0
+move $a1, $s0					# borne supérieure pour le calcul d'un nombre aléatoire -> $a1
+jal nombre_alea_entre_deux_bornes
+move $a1, $v0					# nombre aléatoire -> $a1
+lw $a0, 0($sp)					# restauration de l'adresse de la pile -> $a0
+jal lecture_cellule				# renvoie de l'indice séléctionné au hasard de la pile -> $v0
+Endif_tirer_hasard_cellule:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $s0, 8($sp)
+lw $ra, 12($sp)
+addi $sp, $sp, 16
 jr $ra
 ####################
