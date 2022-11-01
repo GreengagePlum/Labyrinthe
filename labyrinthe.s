@@ -415,6 +415,43 @@ jr $ra
 
 
 
+############################## Fonction st_reinitialiser
+### 
+### Cette fonction prend en entrée un paramètre tel que l'adresse d'une pile.
+### Elle la dépile jusq'à ce qu'elle a 0 éléments.
+### 
+### Entrées : l'adresse d'une pile ($a0)
+### Sorties : -
+### 
+### Pré-conditions : -
+### Post-conditions : La pile est modifié
+### 
+st_reinitialiser:
+# prologue
+addi $sp, $sp, -12
+sw $a0, 0($sp)
+sw $s0, 4($sp)
+sw $ra, 8($sp)
+# corps
+jal st_est_vide
+beq $v0, 1, Exit_st_est_vide	# si la pile est vide ne fait rien
+lw $s0, 4($a0)			# sinon, charger la taille de la pile comme compteur de boucle -> $s0
+Loop_st_est_vide:
+blez $s0, Exit_st_est_vide	# boucle pour dépiler tous les éléments de la pile
+jal st_depiler
+subi $s0, $s0, 1		# décrementer le compteur de boucle -> $s0
+b Loop_st_est_vide
+Exit_st_est_vide:
+# épilogue
+lw $a0, 0($sp)
+lw $s0, 4($sp)
+lw $ra, 8($sp)
+addi $sp, $sp, 12
+jr $ra
+####################
+
+
+
 ############################## Fonction creer_laby
 ### 
 ### Cette fonction prend en entrée un paramètre tel qu'un entier
@@ -821,7 +858,7 @@ jr $ra
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule c ($a1), l'adresse d'une pile ($a2)
 ### Sorties : -
 ### 
-### Pré-conditions : 0 <= c <= taille maximale labyrinthe - 1, pile est de taille 4
+### Pré-conditions : 0 <= c <= taille maximale labyrinthe - 1, pile est de taille 4 et vide
 ### Post-conditions : La pile donnée est modifié. S'il n'y a pas de voisin, la pile renvoyée est vide.
 ### 
 trouver_voisin_cellule:
