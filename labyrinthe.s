@@ -808,3 +808,52 @@ lw $ra, 32($sp)
 addi $sp, $sp, 36
 jr $ra
 ####################
+
+
+
+############################## Fonction trouver_voisin_cellule
+### 
+### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une 
+### pile qui représente un labyrinthe, l'indice d'une des cellules de ceci et
+### l'adresse d'une pile pour écrire les résultats.
+### Elle remplit la pile avec les indices des cellules voisines à la cellule donnée.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule c ($a1), l'adresse d'une pile ($a2)
+### Sorties : -
+### 
+### Pré-conditions : 0 <= c <= taille maximale labyrinthe - 1, pile est de taille 4
+### Post-conditions : La pile donnée est modifié. S'il n'y a pas de voisin, la pile renvoyée est vide.
+### 
+trouver_voisin_cellule:
+# prologue
+addi $sp, $sp, -20
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $a2, 8($sp)
+sw $s0, 12($sp)
+sw $ra, 16($sp)
+# corps
+li $s0, 1					# compteur de la boucle -> $s0
+Loop_trouver_voisin_cellule:
+bgt $s0, 4, Exit_Loop_trouver_voisin_cellule	# boucle qui teste toutes les 4 directions pour trouver un voisin
+move $a2, $s0					# préparation du paramètre pour la fonction trouver_indice_cellule -> $a2
+jal trouver_indice_cellule
+beq $v0, -1, Endif_trouver_voisin_cellule	# condition pour vérifier si l'indice retourné est valide
+lw $a0, 8($sp)					# restauration de l'adresse de la pile de retour -> $a0
+move $a1, $v0					# l'indice de la cellule voisine valide trouvée -> $a1
+jal st_empiler					# empiler le voisin trouver dans la pile de retour
+lw $a0, 0($sp)					# restaurer l'adresse du labyrinthe -> $a0
+lw $a1, 4($sp)					# restaurer l'indice de la cellule de départ -> $a1
+Endif_trouver_voisin_cellule:
+addi $s0, $s0, 1				# incrémenter le compteur -> $s0
+b Loop_trouver_voisin_cellule
+Exit_Loop_trouver_voisin_cellule:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $a2, 8($sp)
+lw $s0, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
+jr $ra
+####################
