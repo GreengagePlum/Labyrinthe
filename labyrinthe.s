@@ -748,31 +748,45 @@ jr $ra
 ### 
 trouver_indice_cellule:
 # prologue
-addi $sp, $sp, -24
+addi $sp, $sp, -36
 sw $a0, 0($sp)
 sw $a1, 4($sp)
 sw $a2, 8($sp)
 sw $s0, 12($sp)
 sw $s1, 16($sp)
-sw $ra, 20($sp)
+sw $s2, 20($sp)
+sw $s3, 24($sp)
+sw $s4, 28($sp)
+sw $ra, 32($sp)
 # corps
 move $s0, $a0					# copier l'adresse de la pile pour ne pas l'écraser -> $s0
 lw $a0, 0($s0)					# charger le nombre total de cellules du labyrinthe -> $a0
+move $s2, $a0					# copier le nombre total de cellules pour ne pas écraser -> $s2
 jal racine_carre				# calcul de la racine carré du nombre total de cellules pour trouver la taille d'une ligne
 move $s1, $v0					# taille d'une ligne du labyrinthe -> $s1
 bne $a2, 1, Elseif1_trouver_indice_cellule	# condition pour vérifier si on va vers le haut
+blt $a1, $s1, OutOfRange_trouver_indice_cellule	# condition pour ne pas calculer le voisin en haut si la cellule est dans la premère ligne
 sub $v0, $a1, $s1				# calcul de l'indice du voisin -> $v0
 b Endif1_trouver_indice_cellule
 Elseif1_trouver_indice_cellule:
 bne $a2, 2, Elseif2_trouver_indice_cellule	# condition pour vérifier si on va vers le bas
+sub $s3, $s2, $s1				# calcul pour trouver si la cellule fait partie de la dernière ligne -> $s3
+bge $a1, $s3, OutOfRange_trouver_indice_cellule	# condition pour ne pas calculer le voisin en bas si la cellule est dans la dernière ligne
 add $v0, $a1, $s1				# calcul de l'indice du voisin -> $v0
 b Endif1_trouver_indice_cellule
 Elseif2_trouver_indice_cellule:
 bne $a2, 3, Elseif3_trouver_indice_cellule	# condition pour vérifier si on va vers la gauche
+div $a1, $s1					# calcul pour trouver si la cellule fait partie de la première colonne -> $s3
+mfhi $s3
+beq $s3, 0, OutOfRange_trouver_indice_cellule	# condition pour ne pas calculer le voisin à gauche si la cellule est dans la première colonne
 subi $v0, $a1, 1				# calcul de l'indice du voisin -> $v0
 b Endif1_trouver_indice_cellule
 Elseif3_trouver_indice_cellule:
 bne $a2, 4, Endif1_trouver_indice_cellule	# condition pour vérifier si on va vers la droite
+div $a1, $s1					# calcul pour trouver si la cellule fait partie de la dernière colonne -> $s4
+mfhi $s4
+subi $s3, $s1, 1
+beq $s3, $s4, OutOfRange_trouver_indice_cellule	# condition pour ne pas calculer le voisin à droite si la cellule est dans la dernière colonne
 addi $v0, $a1, 1				# calcul de l'indice du voisin -> $v0
 Endif1_trouver_indice_cellule:
 bltz $v0, OutOfRange_trouver_indice_cellule	# condition pour vérifier s'il y a un dépassement vers les indices négatives
@@ -787,7 +801,10 @@ lw $a1, 4($sp)
 lw $a2, 8($sp)
 lw $s0, 12($sp)
 lw $s1, 16($sp)
-lw $ra, 20($sp)
-addi $sp, $sp, 24
+lw $s2, 20($sp)
+lw $s3, 24($sp)
+lw $s4, 28($sp)
+lw $ra, 32($sp)
+addi $sp, $sp, 36
 jr $ra
 ####################
