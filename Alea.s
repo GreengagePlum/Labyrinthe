@@ -17,7 +17,7 @@ seed: .word 0xfaceb00c, 0xdeadbeef
 max_float_alea: .float 2147483647
 
 .text
-.globl __start
+.globl nombre_alea_entre_deux_bornes
 
 # Point d'entrée du programme
 __start:
