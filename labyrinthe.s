@@ -14,6 +14,7 @@ __start:
 
 
 
+
 ############################## Fonction cell_lecture_bit
 ### 
 ### Cette fonction prend en entrée deux paramètres tels qu'un entier
@@ -363,6 +364,52 @@ lw $a0, 0($sp)
 lw $s0, 4($sp)
 lw $ra, 8($sp)
 addi $sp, $sp, 12
+jr $ra
+####################
+
+
+
+############################## Fonction st_afficher
+### 
+### Cette fonction prend en entrée un paramètre tel que l'adresse d'une pile.
+### Elle affiche le contenu de la pile sur une ligne sans saut de ligne à la fin.
+### 
+### Entrées : l'adresse de la pile ($a0)
+### Sorties : -
+### 
+### Pré-conditions : -
+### Post-conditions : Affichage des entiers sans saut de ligne
+### 
+st_afficher:
+# prologue
+addi $sp, $sp, -16
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $s0, 8($sp)
+sw $ra, 12($sp)
+# corps
+jal st_est_vide
+bnez $v0, Exit_st_afficher			# condition de récursivité du cas base : la pile est-elle vide ?
+jal st_sommet
+move $s0, $v0					# sommet de la pile -> $s0
+move $a0, $s0					# affichage du sommet
+li $v0, 1
+syscall
+la $a0, Espace					# affichage d'un espace après l'entier
+li $v0, 4
+syscall
+lw $a0, 0($sp)					# restaurer l'adresse de la pile -> $a0
+jal st_depiler					# passer au cas plus petit d'un cran pour préparer l'appel récursive
+jal st_afficher
+move $a1, $s0					# préparer le paramètre de la fonction st_empiler avec le sommet de la pile -> $a1
+jal st_empiler					# empiler le sommet qui était dépilé avant pour reconstruire la pile du début
+Exit_st_afficher:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $s0, 8($sp)
+lw $ra, 12($sp)
+addi $sp, $sp, 16
 jr $ra
 ####################
 
