@@ -894,3 +894,92 @@ lw $ra, 16($sp)
 addi $sp, $sp, 20
 jr $ra
 ####################
+
+
+
+############################## Fonction trouver_voisin_non_visite_cellule
+### 
+### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une 
+### pile qui représente un labyrinthe, l'indice d'une des cellules de ceci et
+### l'adresse d'une pile pour écrire les résultats.
+### Elle remplit la pile avec les indices des cellules voisines non visitées à la cellule donnée.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule c ($a1), l'adresse d'une pile ($a2)
+### Sorties : -
+### 
+### Pré-conditions : 0 <= c <= taille maximale labyrinthe - 1, pile est de taille 4 et vide
+### Post-conditions : La pile donnée est modifié. S'il n'y a pas de voisin non visité, la pile renvoyée est vide.
+### 
+trouver_voisin_non_visite_cellule:
+# prologue
+addi $sp, $sp, -16
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $a2, 8($sp)
+sw $ra, 12($sp)
+# corps
+jal trouver_voisin_cellule		# remplir la pile avec les indices des voisins
+move $a1, $a2				# l'adresse de la pile contenant les indices -> $a1
+jal enlever_voisin_visite_cellule	# enlever les indices des voisins visité de la pile
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $a2, 8($sp)
+lw $ra, 12($sp)
+addi $sp, $sp, 16
+jr $ra
+####################
+
+
+
+############################## Fonction enlever_voisin_visite_cellule
+### 
+### Cette fonction prend en paramètre deux arguments tels que l'adresse d'une 
+### pile qui représente un labyrinthe et l'adresse d'une pile qui contient des indices.
+### Elle enleve les indices des cellules qui était visité de la pile.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'adresse d'une pile ($a1)
+### Sorties : -
+### 
+### Pré-conditions : -
+### Post-conditions : La pile donnée est modifié. Si toutes les cellules étaient visité, la pile est vide.
+### 
+enlever_voisin_visite_cellule:
+# prologue
+addi $sp, $sp, -20
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $s0, 8($sp)
+sw $s1, 12($sp)
+sw $ra, 16($sp)
+# corps
+move $a0, $a1
+jal st_est_vide
+beq $v0, 1, Exit_enlever_voisin_visite_cellule		# condition pour vérifier si la pile des indices est vide
+jal st_sommet
+move $s0, $v0						# sommet de la pile des indices -> $s0
+lw $a0, 0($sp)						# restaurer l'adresse du labyrinthe -> $a0
+move $a1, $s0						# sommet de la pile des indices -> $a1
+jal lecture_cellule
+move $a0, $v0						# la valeur de la cellule à l'indice au sommet de la pile -> $a0
+li $a1, 6
+jal cell_lecture_bit
+move $s1, $v0						# la valeur du bit numéro 6 qui indique si la cellule était visitée ou non -> $s1
+lw $a0, 4($sp)						# restaurer l'adresse de la pile -> $a0
+jal st_depiler
+lw $a0, 0($sp)						# restaurer l'adresse du labyrinthe -> $a0
+lw $a1, 4($sp)						# restaurer l'adresse de la pile -> $a1
+jal enlever_voisin_visite_cellule			# appel récursif
+beq $s1, 1, Exit_enlever_voisin_visite_cellule		# empiler l'élément dépilé seulement si c'était une cellule non visité
+move $a1, $s0
+jal st_empiler
+Exit_enlever_voisin_visite_cellule:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $s0, 8($sp)
+lw $s1, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
+jr $ra
+####################
