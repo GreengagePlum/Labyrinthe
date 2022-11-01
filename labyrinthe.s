@@ -356,7 +356,7 @@ sw $s0, 4($sp)
 sw $ra, 8($sp)
 # corps
 lw $s0, 4($a0)		# chargement du nombre d'éléments de la pile -> $s0
-subi $s0, $s0, 1	# désincrementer le nombre d'éléments de la pile -> $s0
+subi $s0, $s0, 1	# décrementer le nombre d'éléments de la pile -> $s0
 sw $s0, 4($a0)		# écriture du nouveau nombre d'éléments dans la pile -> 4($a0)
 # épilogue
 lw $a0, 0($sp)
@@ -680,5 +680,67 @@ lw $a2, 8($sp)
 lw $s0, 12($sp)
 lw $ra, 16($sp)
 addi $sp, $sp, 20
+jr $ra
+####################
+
+
+
+############################## Fonction trouver_indice_cellule
+### 
+### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une 
+### pile qui représente un labyrinthe, l'indice d'une des cellules de ceci et
+### un entier d qui représente une direction tel que haut, bas, gauche, droite
+### par 1, 2, 3, 4 respectivement. Elle renvoie l'indice de la cellule qui se
+### situe dans la direction donnée en partant de la cellule donné.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule c ($a1), un entier pour une direction d ($a2)
+### Sorties : l'indice d'une cellule ($v0)
+### 
+### Pré-conditions : 0 <= c <= taille maximale labyrinthe - 1, 1 <= d <= 4
+### Post-conditions : S'il n'y a pas de cellule dans la direction demandé, la fonction renvoie -1
+### 
+trouver_indice_cellule:
+# prologue
+addi $sp, $sp, -24
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $a2, 8($sp)
+sw $s0, 12($sp)
+sw $s1, 16($sp)
+sw $ra, 20($sp)
+# corps
+move $s0, $a0					# copier l'adresse de la pile pour ne pas l'écraser -> $s0
+lw $a0, 0($s0)					# charger le nombre total de cellules du labyrinthe -> $a0
+jal racine_carre				# calcul de la racine carré du nombre total de cellules pour trouver la taille d'une ligne
+move $s1, $v0					# taille d'une ligne du labyrinthe -> $s1
+bne $a2, 1, Elseif1_trouver_indice_cellule	# condition pour vérifier si on va vers le haut
+sub $v0, $a1, $s1				# calcul de l'indice du voisin -> $v0
+b Endif1_trouver_indice_cellule
+Elseif1_trouver_indice_cellule:
+bne $a2, 2, Elseif2_trouver_indice_cellule	# condition pour vérifier si on va vers le bas
+add $v0, $a1, $s1				# calcul de l'indice du voisin -> $v0
+b Endif1_trouver_indice_cellule
+Elseif2_trouver_indice_cellule:
+bne $a2, 3, Elseif3_trouver_indice_cellule	# condition pour vérifier si on va vers la gauche
+subi $v0, $a1, 1				# calcul de l'indice du voisin -> $v0
+b Endif1_trouver_indice_cellule
+Elseif3_trouver_indice_cellule:
+bne $a2, 4, Endif1_trouver_indice_cellule	# condition pour vérifier si on va vers la droite
+addi $v0, $a1, 1				# calcul de l'indice du voisin -> $v0
+Endif1_trouver_indice_cellule:
+bltz $v0, OutOfRange_trouver_indice_cellule	# condition pour vérifier s'il y a un dépassement vers les indices négatives
+bge $v0, $s0, OutOfRange_trouver_indice_cellule	# condition pour vérifier s'il y a un dépassement vers les indices au-dela de la taille du labyrinthe
+b Exit_OutOfRange_trouver_indice_cellule
+OutOfRange_trouver_indice_cellule:
+li $v0, -1					# retour de l'indice invalide -1 -> $v0
+Exit_OutOfRange_trouver_indice_cellule:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $a2, 8($sp)
+lw $s0, 12($sp)
+lw $s1, 16($sp)
+lw $ra, 20($sp)
+addi $sp, $sp, 24
 jr $ra
 ####################
