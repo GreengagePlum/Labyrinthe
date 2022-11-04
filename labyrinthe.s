@@ -13,7 +13,6 @@ __main:
 
 
 
-
 ############################## Fonction cell_lecture_bit
 ### 
 ### Cette fonction prend en entrée deux paramètres tels qu'un entier
@@ -1027,5 +1026,49 @@ lw $a1, 4($sp)
 lw $s0, 8($sp)
 lw $ra, 12($sp)
 addi $sp, $sp, 16
+jr $ra
+####################
+
+
+
+############################## Fonction marquer_visite_cellule
+### 
+### Cette fonction prend en paramètre deux arguments tel que 
+### l'adresse d'une pile qui représente un labyrinthe et
+### l'indice d'une cellule de ceci.
+### Elle marque la cellule comme visité.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule n ($a1)
+### Sorties : -
+### 
+### Pré-conditions : 0 <= n <= taille du labyrinthe - 1
+### Post-conditions : -
+### 
+marquer_visite_cellule:
+# prologue
+addi $sp, $sp, -20
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $a2, 8($sp)
+sw $s0, 12($sp)
+sw $ra, 16($sp)
+# corps
+jal lecture_cellule
+move $s0, $v0
+move $a0, $s0
+li $a1, 6
+jal cell_mettre_bit_a1
+move $s0, $v0
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+move $a2, $s0
+jal modifier_cellule
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $a2, 8($sp)
+lw $s0, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
 jr $ra
 ####################
