@@ -116,7 +116,7 @@ sub $s1, $s0, $a1
 subi $s1, $s1, 1				# condition du if dans Loop1 -> $s1
 li $s2, 1
 Loop1_cell_mettre_bit_a0:
-beqz $s0, Exit_Loop1_cell_mettre_bit_a0		# boucle de construction du début du filtre "and" à utiliser pour changer le bit i en 0 -> $s2
+blez $s0, Exit_Loop1_cell_mettre_bit_a0		# boucle de construction du début du filtre "and" à utiliser pour changer le bit i en 0 -> $s2
 sll $s2, $s2, 1					# remplissage avec des 1 les bits à gauche du bit numéro i -> $s2
 sub $s0, $s0, 1					# décrementation compteur Loop1 -> $s0
 sub $s1, $s1, 1					# décrementation condition if -> $s1
@@ -134,7 +134,12 @@ addi $s3, $s3, 1				# remplissage des bits à droite du bit numéro i par des 1 
 sub $s1, $s1, 1
 b Loop2_cell_mettre_bit_a0
 Exit_Loop2_cell_mettre_bit_a0:
+bltz $s1, Elseif_cell_mettre_bit_a0		# condition pour vérifier s'il faut combiner les deux parties du filtre construit
 add $s4, $s2, $s3				# combinaison des deux parties "debut" et "fin" du filtre "and" à utiliser -> $s4
+b Endif_cell_mettre_bit_a0
+Elseif_cell_mettre_bit_a0:
+move $s4, $s2					# saut de la combinaison, utilisation du début seulement (pour le cas de la modification du bit 0)
+Endif_cell_mettre_bit_a0:
 and $s5, $a0, $s4				# mettre à 0 le bit i de l'entier n de départ en utilisant le filtre "and" qui n'a seulement le bit i qui est égale à 0 tous les autres 1 -> $s5
 move $v0, $s5					# mettre le résultat dans le registre de retour -> $v0
 # épilogue
@@ -1054,15 +1059,15 @@ sw $s0, 12($sp)
 sw $ra, 16($sp)
 # corps
 jal lecture_cellule
-move $s0, $v0
+move $s0, $v0			# cellule à l'indice n -> $s0
 move $a0, $s0
 li $a1, 6
 jal cell_mettre_bit_a1
-move $s0, $v0
+move $s0, $v0			# cellule à l'indice n avec le bit numéro 6 qui est 1 -> $s0
 lw $a0, 0($sp)
 lw $a1, 4($sp)
 move $a2, $s0
-jal modifier_cellule
+jal modifier_cellule		# remmetre la cellule modifié à l'indice n
 # épilogue
 lw $a0, 0($sp)
 lw $a1, 4($sp)
@@ -1070,5 +1075,207 @@ lw $a2, 8($sp)
 lw $s0, 12($sp)
 lw $ra, 16($sp)
 addi $sp, $sp, 20
+jr $ra
+####################
+
+
+
+############################## Fonction casser_mur_direction
+### 
+### Cette fonction prend en paramètre deux arguments tel qu'un entier
+### qui représente une cellule et un entier qui représente une direction
+### tel que haut, bas, gauche, droite par 1, 2, 3, 4 respectivement.
+### Elle casse le mur de la cellule dans la direction indiqué en modifiant
+### le bit représentant et renvoie le nouvel entier.
+### 
+### Entrées : un entier d'une cellule c ($a0), un entier d'une direction d ($a1)
+### Sorties : un entier d'une cellule ($v0)
+### 
+### Pré-conditions : 0 <= c <= 99, 1 <= d <= 4
+### Post-conditions : -
+### 
+casser_mur_direction:
+# prologue
+addi $sp, $sp, -12
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $ra, 8($sp)
+# corps
+bne $a1, 1, Elseif1_casser_mur_direction	# condition pour vérifier si on va vers le haut
+li $a1, 0					# casser mur en haut
+jal cell_mettre_bit_a0
+b Endif1_casser_mur_direction
+Elseif1_casser_mur_direction:
+bne $a1, 2, Elseif2_casser_mur_direction	# condition pour vérifier si on va vers le bas
+li $a1, 2					# casser mur en bas
+jal cell_mettre_bit_a0
+b Endif1_casser_mur_direction
+Elseif2_casser_mur_direction:
+bne $a1, 3, Elseif3_casser_mur_direction	# condition pour vérifier si on va vers la gauche
+li $a1, 3					# casser mur à gauche
+jal cell_mettre_bit_a0
+b Endif1_casser_mur_direction
+Elseif3_casser_mur_direction:
+bne $a1, 4, Endif1_casser_mur_direction		# condition pour vérifier si on va vers la droite
+li $a1, 1					# casser mur à droite
+jal cell_mettre_bit_a0
+Endif1_casser_mur_direction:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $ra, 8($sp)
+addi $sp, $sp, 12
+jr $ra
+####################
+
+
+
+############################## Fonction casser_mur_cellule
+### 
+### Cette fonction prend en paramètre trois arguments tel que 
+### l'adresse d'une pile qui représente un labyrinthe, l'indice de deux cellules de ceci.
+### Elle casse le mur entre ces deux cellules en mettant le bit représentatif à 0.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule n1 ($a1), l'indice d'une cellule n2 ($a2)
+### Sorties : -
+### 
+### Pré-conditions : 0 <= n1 != n2 <= taille du labyrinthe - 1, les deux cellules sont voisines
+### Post-conditions : -
+### 
+casser_mur_cellule:
+# prologue
+addi $sp, $sp, -40
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $a2, 8($sp)
+sw $s0, 12($sp)
+sw $s1, 16($sp)
+sw $s2, 20($sp)
+sw $s3, 24($sp)
+sw $s4, 28($sp)
+sw $s5, 32($sp)
+sw $ra, 36($sp)
+# corps
+move $s0, $a0					# copier l'adresse de la pile pour ne pas l'écraser -> $s0
+lw $a0, 0($s0)					# charger le nombre total de cellules du labyrinthe -> $a0
+move $s2, $a0					# copier le nombre total de cellules pour ne pas écraser -> $s2
+jal racine_carre				# calcul de la racine carré du nombre total de cellules pour trouver la taille d'une ligne
+move $s1, $v0					# taille d'une ligne du labyrinthe -> $s1
+move $a0, $s0
+addi $s3, $a1, 1
+bne $s3, $a2, Elseif1_casser_mur_cellule	# condition pour vérifier si la cellule n2 est à droite de la cellule n1
+jal lecture_cellule
+move $s4, $v0					# la valeur de la cellule n1 -> $s4
+move $a0, $s4
+li $a1, 4
+jal casser_mur_direction
+move $s5, $v0					# la valeur de la cellule n1 après mur cassé -> $s5
+move $a2, $s5
+lw $a1, 4($sp)
+move $a0, $s0
+jal modifier_cellule
+move $a0, $s0
+lw $a1, 8($sp)
+jal lecture_cellule
+move $s4, $v0					# la valeur de la cellule n2 -> $s4
+move $a0, $s4
+li $a1, 3
+jal casser_mur_direction
+move $s5, $v0					# la valeur de la cellule n2 après mur cassé -> $s5
+move $a2, $s5
+lw $a1, 8($sp)
+move $a0, $s0
+jal modifier_cellule
+b Endif_casser_mur_cellule
+Elseif1_casser_mur_cellule:
+subi $s3, $a1, 1
+bne $s3, $a2, Elseif2_casser_mur_cellule	# condition pour vérifier si la cellule n2 est à gauche de la cellule n1
+jal lecture_cellule
+move $s4, $v0					# la valeur de la cellule n1 -> $s4
+move $a0, $s4
+li $a1, 3
+jal casser_mur_direction
+move $s5, $v0					# la valeur de la cellule n1 après mur cassé -> $s5
+move $a2, $s5
+lw $a1, 4($sp)
+move $a0, $s0
+jal modifier_cellule
+move $a0, $s0
+lw $a1, 8($sp)
+jal lecture_cellule
+move $s4, $v0					# la valeur de la cellule n2 -> $s4
+move $a0, $s4
+li $a1, 4
+jal casser_mur_direction
+move $s5, $v0					# la valeur de la cellule n2 après mur cassé -> $s5
+move $a2, $s5
+lw $a1, 8($sp)
+move $a0, $s0
+jal modifier_cellule
+b Endif_casser_mur_cellule
+Elseif2_casser_mur_cellule:
+add $s3, $a1, $s1				# condition pour vérifier si la cellule n2 est au bas de la cellule n1
+bne $s3, $a2, Elseif3_casser_mur_cellule
+jal lecture_cellule
+move $s4, $v0					# la valeur de la cellule n1 -> $s4
+move $a0, $s4
+li $a1, 2
+jal casser_mur_direction
+move $s5, $v0					# la valeur de la cellule n1 après mur cassé -> $s5
+move $a2, $s5
+lw $a1, 4($sp)
+move $a0, $s0
+jal modifier_cellule
+move $a0, $s0
+lw $a1, 8($sp)
+jal lecture_cellule
+move $s4, $v0					# la valeur de la cellule n2 -> $s4
+move $a0, $s4
+li $a1, 1
+jal casser_mur_direction
+move $s5, $v0					# la valeur de la cellule n2 après mur cassé -> $s5
+move $a2, $s5
+lw $a1, 8($sp)
+move $a0, $s0
+jal modifier_cellule
+b Endif_casser_mur_cellule
+Elseif3_casser_mur_cellule:
+sub $s3, $a1, $s1
+bne $s3, $a2, Endif_casser_mur_cellule		# condition pour vérifier si la cellule n2 est au haut de la cellule n1
+jal lecture_cellule
+move $s4, $v0					# la valeur de la cellule n1 -> $s4
+move $a0, $s4
+li $a1, 1
+jal casser_mur_direction
+move $s5, $v0					# la valeur de la cellule n1 après mur cassé -> $s5
+move $a2, $s5
+lw $a1, 4($sp)
+move $a0, $s0
+jal modifier_cellule
+move $a0, $s0
+lw $a1, 8($sp)
+jal lecture_cellule
+move $s4, $v0					# la valeur de la cellule n2 -> $s4
+move $a0, $s4
+li $a1, 2
+jal casser_mur_direction
+move $s5, $v0					# la valeur de la cellule n2 après mur cassé -> $s5
+move $a2, $s5
+lw $a1, 8($sp)
+move $a0, $s0
+jal modifier_cellule
+Endif_casser_mur_cellule:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $a2, 8($sp)
+lw $s0, 12($sp)
+lw $s1, 16($sp)
+lw $s2, 20($sp)
+lw $s3, 24($sp)
+lw $s4, 28($sp)
+lw $s5, 32($sp)
+lw $ra, 36($sp)
+addi $sp, $sp, 40
 jr $ra
 ####################
