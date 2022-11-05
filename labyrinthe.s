@@ -8,7 +8,27 @@ NouvLigne:	.asciiz "\n"
 __main:
 
 
+li $a0, 3
+jal creer_laby
+move $s0, $v0
 
+li $a0, 4
+jal st_creer
+move $s1, $v0
+
+move $a0, $s0
+li $a1, 0
+jal marquer_visite_cellule
+
+move $a0, $s0
+move $a1, $s1
+li $a2, 0
+jal generer_laby
+
+jal afficher_laby
+
+li $v0, 10
+syscall
 
 
 
@@ -1277,5 +1297,80 @@ lw $s4, 28($sp)
 lw $s5, 32($sp)
 lw $ra, 36($sp)
 addi $sp, $sp, 40
+jr $ra
+####################
+
+
+
+############################## Fonction generer_laby
+### 
+### Cette fonction prend en paramètre deux arguments tel que 
+### l'adresse d'une pile qui représente un labyrinthe et une pile de 4 entiers pour les voisins.
+### Elle génére le labyrinthe aléatoire en modifiant les murs des cellules.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'adresse d'une pile ($a1)
+### Sorties : -
+### 
+### Pré-conditions : la première cellule est marqué visité
+### Post-conditions : -
+### 
+generer_laby:
+# prologue
+addi $sp, $sp, -24
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $a2, 8($sp)
+sw $s0, 12($sp)
+sw $s1, 16($sp)
+sw $ra, 20($sp)
+# corps
+jal st_est_vide
+beq $v0, 1, Endif_generer_laby
+move $a2, $a1
+lw $a1, 8($sp)
+jal trouver_voisin_non_visite_cellule
+
+lw $a0, 4($sp)
+jal st_est_vide
+beqz $v0, Elseif_generer_laby
+lw $a0, 0($sp)
+jal st_sommet
+move $s0, $v0				# sommet du labyrinthe -> $s0
+jal st_depiler
+lw $a0, 4($sp)
+jal st_reinitialiser
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+li $a2, 0
+jal generer_laby
+lw $a0, 0($sp)
+move $a1, $s0
+jal st_empiler
+b Endif_generer_laby
+Elseif_generer_laby:
+lw $a0, 4($sp)
+jal tirer_hasard_cellule
+move $s1, $v0				# l'indice d'un voisin au hasard -> $s1
+
+lw $a0, 0($sp)
+move $a1, $s1
+lw $a2, 8($sp)
+jal casser_mur_cellule
+jal marquer_visite_cellule
+lw $a0, 4($sp)
+jal st_reinitialiser
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+move $a2, $s1
+jal generer_laby
+Endif_generer_laby:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $a2, 8($sp)
+lw $s0, 12($sp)
+lw $s1, 16($sp)
+lw $ra, 20($sp)
+addi $sp, $sp, 24
 jr $ra
 ####################
