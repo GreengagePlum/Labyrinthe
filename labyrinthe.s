@@ -1304,11 +1304,12 @@ jr $ra
 
 ############################## Fonction generer_laby
 ### 
-### Cette fonction prend en paramètre deux arguments tel que 
-### l'adresse d'une pile qui représente un labyrinthe et une pile de 4 entiers pour les voisins.
+### Cette fonction prend en paramètre trois arguments tel que 
+### l'adresse d'une pile qui représente un labyrinthe, une pile de 4 entiers pour les voisins
+### et l'indice de la cellule à traiter pour la rechercher les voisin (cellule courante).
 ### Elle génére le labyrinthe aléatoire en modifiant les murs des cellules.
 ### 
-### Entrées : l'adresse d'un labyrinthe ($a0), l'adresse d'une pile ($a1)
+### Entrées : l'adresse d'un labyrinthe ($a0), l'adresse d'une pile ($a1), l'indice d'une cellule ($a2)
 ### Sorties : -
 ### 
 ### Pré-conditions : la première cellule est marqué visité
