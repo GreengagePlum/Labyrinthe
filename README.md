@@ -19,7 +19,8 @@ chmod u+x print_maze.sh
 Puis, executer ces deux lignes de commandes en mettant la taille que vous voulez :
 
 ```bash
-java -jar Mars4_5.jar p me labyrinthe.s pa <taille d'une ligne du labyrinthe> > laby.txt
+java -jar Mars4_5.jar p me labyrinthe.s pa <taille du labyrinthe> > laby.txt
+
 ./print_maze.sh laby.txt
 ```
 
