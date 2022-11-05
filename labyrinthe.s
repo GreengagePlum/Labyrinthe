@@ -7,9 +7,20 @@ NouvLigne:	.asciiz "\n"
 
 __main:
 
+# Point d'entrée du programme (à executer du ligne de commande)
+# java -jar Mars4_5.jar p me labyrinthe.s pa <taille ligne laby>
+lw $s0, 0($a1)
+la $s1, 0($s0)
+lb $a0, 0($s1)
+sub $a0, $a0, 48	# convertir caractère ascii en chiffre -> $a0
 
+jal demarrer_laby
 
+j Exit
 
+Exit:
+li $v0, 10
+syscall
 
 
 
@@ -1277,5 +1288,157 @@ lw $s4, 28($sp)
 lw $s5, 32($sp)
 lw $ra, 36($sp)
 addi $sp, $sp, 40
+jr $ra
+####################
+
+
+
+############################## Fonction generer_laby
+### 
+### Cette fonction prend en paramètre deux arguments tel que 
+### l'adresse d'une pile qui représente un labyrinthe et une pile de 4 entiers pour les voisins.
+### Elle génére le labyrinthe aléatoire en modifiant les murs des cellules.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0), l'adresse d'une pile ($a1)
+### Sorties : -
+### 
+### Pré-conditions : la première cellule est marqué visité
+### Post-conditions : -
+### 
+generer_laby:
+# prologue
+addi $sp, $sp, -24
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $a2, 8($sp)
+sw $s0, 12($sp)
+sw $s1, 16($sp)
+sw $ra, 20($sp)
+# corps
+move $s0, $a0					# copier l'adresse de la pile pour ne pas l'écraser -> $s0
+lw $a0, 0($s0)					# charger le nombre total de cellules du labyrinthe -> $a0
+jal racine_carre				# calcul de la racine carré du nombre total de cellules pour trouver la taille d'une ligne
+move $s1, $v0					# taille d'une ligne du labyrinthe -> $s1
+lw $a0, 0($sp)
+lw $s0, 4($a0)
+sub $s1, $s0, $s1				# limite boucle : nombre total de cellule - nombre de cellule sur une ligne -> $s1
+li $s0, 0					# compteur boucle -> $s0
+lw $a0, 0($sp)
+Loop_generer_laby:
+bge $s0, $s1, Exit_Loop_generer_laby
+move $a1, $s0
+jal marquer_visite_cellule
+lw $a0, 4($sp)
+jal st_reinitialiser
+lw $a0, 0($sp)
+lw $a2, 4($sp)
+jal trouver_voisin_non_visite_cellule
+move $a0, $a2
+jal tirer_hasard_cellule
+lw $a0, 0($sp)
+move $a2, $v0
+jal casser_mur_cellule
+move $a1, $a2
+jal marquer_visite_cellule
+addi $s0, $s0, 1
+b Loop_generer_laby
+Exit_Loop_generer_laby:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $a2, 8($sp)
+lw $s0, 12($sp)
+lw $s1, 16($sp)
+lw $ra, 20($sp)
+addi $sp, $sp, 24
+jr $ra
+####################
+
+
+
+############################## Fonction nettoyer_laby
+### 
+### Cette fonction prend en paramètre un argument tel que 
+### l'adresse d'une pile qui représente un labyrinthe.
+### Elle fait le nettoyage en mettant les 6e bits des cellules à zéro.
+### 
+### Entrées : l'adresse d'un labyrinthe ($a0)
+### Sorties : -
+### 
+### Pré-conditions : Toutes les cellules ont été marqué visité
+### Post-conditions : -
+### 
+nettoyer_laby:
+# prologue
+addi $sp, $sp, -20
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $a2, 8($sp)
+sw $s0, 12($sp)
+sw $ra, 16($sp)
+# corps
+lw $s0, 4($a0)
+Loop_nettoyer_laby:
+blez $s0, Exit_Loop_nettoyer_laby
+move $a1, $s0
+jal lecture_cellule
+subi $v0, $v0, 64
+move $a2, $v0
+jal modifier_cellule
+subi $s0, $s0, 1
+b Loop_nettoyer_laby
+Exit_Loop_nettoyer_laby:
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $a2, 8($sp)
+lw $s0, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
+jr $ra
+####################
+
+
+
+############################## Fonction demarrer_laby
+### 
+### Cette fonction prend en paramètre un argument tel que la taille d'un coté du labyrinthe.
+### Elle génére le labyrinthe et l'affiche.
+### 
+### Entrées : un entier n ($a0)
+### Sorties : -
+### 
+### Pré-conditions : 2 < n <= 5
+### Post-conditions : Affichage d'entiers
+### 
+demarrer_laby:
+# prologue
+addi $sp, $sp, -20
+sw $a0, 0($sp)
+sw $a1, 4($sp)
+sw $s0, 8($sp)
+sw $s1, 12($sp)
+sw $ra, 16($sp)
+# corps
+jal creer_laby
+move $s0, $v0			# l'adresse du labyrinthe -> $s0
+li $a0, 4
+jal st_creer
+move $s1, $v0			# l'adresse de la pile pour mettre les indices des voisins -> $s1
+move $a0, $s0
+li $a1, 0
+jal marquer_visite_cellule
+move $a0, $s0
+move $a1, $s1
+jal generer_laby
+jal nettoyer_laby
+jal afficher_laby
+# épilogue
+lw $a0, 0($sp)
+lw $a1, 4($sp)
+lw $s0, 8($sp)
+lw $s1, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
 jr $ra
 ####################
