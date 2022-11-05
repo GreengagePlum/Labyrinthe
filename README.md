@@ -8,6 +8,8 @@ Le fichier rendu du projet est celui nommé "labyrinthe.s" contenant du code sou
 
 Avec le pdf du sujet vous pouvez vous renseigner sur le projet. Malheureusement d'un point de vue optimisation, complexité et efficacité, il n'est pas le meilleur même si j'ai suivi avec précision la progression conseillée.
 
+Regardez aussi le rapport de rendu pour vous renseignez sur les difficultés que j'ai eu et les choix d'implémentation.
+
 ## Commandes à utiliser pour l'execution
 
 Dans un premier temps rendez le shell script "print_maze.sh" executable par :
