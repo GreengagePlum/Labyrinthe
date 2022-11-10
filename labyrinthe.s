@@ -1378,8 +1378,9 @@ sw $s0, 12($sp)
 sw $ra, 16($sp)
 # corps
 lw $s0, 4($a0)
+subi $s0, $s0, 1
 Loop_nettoyer_laby:
-blez $s0, Exit_Loop_nettoyer_laby
+bltz $s0, Exit_Loop_nettoyer_laby
 move $a1, $s0
 jal lecture_cellule
 subi $v0, $v0, 64
