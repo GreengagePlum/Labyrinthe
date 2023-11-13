@@ -7,7 +7,7 @@ NouvLigne:	.asciiz "\n"
 
 __main:
 
-# Point d'entrée du programme (à executer du ligne de commande)
+# Point d'entrée du programme (à executer depuis la ligne de commande)
 # java -jar Mars4_5.jar p me labyrinthe.s pa <taille ligne laby>
 lw $s0, 0($a1)
 la $s1, 0($s0)
@@ -25,17 +25,17 @@ syscall
 
 
 ############################## Fonction cell_lecture_bit
-### 
+###
 ### Cette fonction prend en entrée deux paramètres tels qu'un entier
 ### et la position d'un des bits de cet entier. Elle retourne la valeur
 ### du bit recherché de l'entier.
-### 
+###
 ### Entrées : un entier n ($a0), la position d'un bit i ($a1)
 ### Sorties : la valeur d'un bit ($v0)
-### 
+###
 ### Pré-conditions : 0 <= i <= 7
 ### Post-conditions : -
-### 
+###
 cell_lecture_bit:
 # prologue
 addi $sp, $sp, -20
@@ -61,17 +61,17 @@ jr $ra
 
 
 ############################## Fonction cell_mettre_bit_a1
-### 
+###
 ### Cette fonction prend en entrée deux paramètres tels qu'un entier
 ### et la position d'un des bits de cet entier. Elle remplace la valeur
 ### du bit recherché de l'entier par un 1.
-### 
+###
 ### Entrées : un entier n ($a0), la position d'un bit i ($a1)
 ### Sorties : entier avec le bit numéro i = 1 ($v0)
-### 
+###
 ### Pré-conditions : 0 <= i <= 7
 ### Post-conditions : -
-### 
+###
 cell_mettre_bit_a1:
 # prologue
 addi $sp, $sp, -20
@@ -98,90 +98,56 @@ jr $ra
 
 
 ############################## Fonction cell_mettre_bit_a0
-### 
+###
 ### Cette fonction prend en entrée deux paramètres tels qu'un entier
 ### et la position d'un des bits de cet entier. Elle remplace la valeur
 ### du bit recherché de l'entier par un 0.
-### 
+###
 ### Entrées : un entier n ($a0), la position d'un bit i ($a1)
 ### Sorties : entier avec le bit numéro i = 0 ($v0)
-### 
+###
 ### Pré-conditions : 0 <= i <= 7
 ### Post-conditions : -
-### 
+###
 cell_mettre_bit_a0:
 # prologue
-addi $sp, $sp, -36
+addi $sp, $sp, -20
 sw $a0, 0($sp)
 sw $a1, 4($sp)
 sw $s0, 8($sp)
 sw $s1, 12($sp)
-sw $s2, 16($sp)
-sw $s3, 20($sp)
-sw $s4, 24($sp)
-sw $s5, 28($sp)
-sw $ra, 32($sp)
+sw $ra, 16($sp)
 # corps
-li $s0, 7					# compteur du Loop1 (modifier au besoin : compteur = nombreDeBitsRepresentifs - 1) -> $s0
-sub $s1, $s0, $a1
-subi $s1, $s1, 1				# condition du if dans Loop1 -> $s1
-li $s2, 1
-Loop1_cell_mettre_bit_a0:
-blez $s0, Exit_Loop1_cell_mettre_bit_a0		# boucle de construction du début du filtre "and" à utiliser pour changer le bit i en 0 -> $s2
-sll $s2, $s2, 1					# remplissage avec des 1 les bits à gauche du bit numéro i -> $s2
-sub $s0, $s0, 1					# décrementation compteur Loop1 -> $s0
-sub $s1, $s1, 1					# décrementation condition if -> $s1
-bltz $s1, Loop1_cell_mettre_bit_a0		# condition pour laisser le bit numéro i = 0
-addi $s2, $s2, 1				# remplissage avec des 1 les bits à gauche du bit numéro i -> $s2
-b Loop1_cell_mettre_bit_a0
-Exit_Loop1_cell_mettre_bit_a0:
-move $s1, $a1					# compteur du Loop2 -> $s1
-sub $s1, $s1, 1
-li $s3, 1
-Loop2_cell_mettre_bit_a0:			# boucle de construction de la fin du filtre "and" à utiliser pour changer le bit i en 0 -> $s3
-blez $s1, Exit_Loop2_cell_mettre_bit_a0
-sll $s3, $s3, 1
-addi $s3, $s3, 1				# remplissage des bits à droite du bit numéro i par des 1 -> $s3
-sub $s1, $s1, 1
-b Loop2_cell_mettre_bit_a0
-Exit_Loop2_cell_mettre_bit_a0:
-bltz $s1, Elseif_cell_mettre_bit_a0		# condition pour vérifier s'il faut combiner les deux parties du filtre construit
-add $s4, $s2, $s3				# combinaison des deux parties "debut" et "fin" du filtre "and" à utiliser -> $s4
-b Endif_cell_mettre_bit_a0
-Elseif_cell_mettre_bit_a0:
-move $s4, $s2					# saut de la combinaison, utilisation du début seulement (pour le cas de la modification du bit 0)
-Endif_cell_mettre_bit_a0:
-and $s5, $a0, $s4				# mettre à 0 le bit i de l'entier n de départ en utilisant le filtre "and" qui n'a seulement le bit i qui est égale à 0 tous les autres 1 -> $s5
-move $v0, $s5					# mettre le résultat dans le registre de retour -> $v0
+li $s0, 1
+sllv $s0, $s0, $a1	# construire nombre binaire avec le bit numéro i = 1 -> $s0
+not $s0, $s0		# inverser le masque binaire, le bit numéro i = 0 -> $s0
+and $s1, $a0, $s0	# remplacer le bit numéro i par 0 -> $s1
+move $v0, $s1		# mettre le résultat dans le registre de retour -> $v0
 # épilogue
 lw $a0, 0($sp)
 lw $a1, 4($sp)
 lw $s0, 8($sp)
 lw $s1, 12($sp)
-lw $s2, 16($sp)
-lw $s3, 20($sp)
-lw $s4, 24($sp)
-lw $s5, 28($sp)
-lw $ra, 32($sp)
-addi $sp, $sp, 36
+lw $ra, 16($sp)
+addi $sp, $sp, 20
 jr $ra
 ####################
 
 
 
 ############################## Fonction st_creer
-### 
+###
 ### Cette fonction prend en entrée un paramètre tel qu'un entier
 ### et crée une représentation de pile sous forme d'un tableau d'entiers
 ### de taille donnée en paramètre plus 2 pour accomoder les informations
 ### sur la taille maximale et le nombre d'éléments actuel.
-### 
+###
 ### Entrées : un entier n représentant la taille ($a0)
 ### Sorties : l'adresse de la pile alloué ($v0)
-### 
+###
 ### Pré-conditions : n > 0
 ### Post-conditions : -
-### 
+###
 st_creer:
 # prologue
 addi $sp, $sp, -12
@@ -208,16 +174,16 @@ jr $ra
 
 
 ############################## Fonction st_est_vide
-### 
+###
 ### Cette fonction prend en entrée un paramètre tel que l'adresse
 ### d'une pile et renvoie 1 si elle est vide et 0 sinon.
-### 
+###
 ### Entrées : l'adresse de la pile ($a0)
 ### Sorties : booléen qui indique si la pile est vide ($v0)
-### 
+###
 ### Pré-conditions : -
 ### Post-conditions : -
-### 
+###
 st_est_vide:
 # prologue
 addi $sp, $sp, -12
@@ -243,16 +209,16 @@ jr $ra
 
 
 ############################## Fonction st_est_pleine
-### 
+###
 ### Cette fonction prend en entrée un paramètre tel que l'adresse
 ### d'une pile et renvoie 1 si elle est pleine et 0 sinon.
-### 
+###
 ### Entrées : l'adresse de la pile ($a0)
 ### Sorties : booléen qui indique si la pile est pleine ($v0)
-### 
+###
 ### Pré-conditions : -
 ### Post-conditions : -
-### 
+###
 st_est_pleine:
 # prologue
 addi $sp, $sp, -16
@@ -281,16 +247,16 @@ jr $ra
 
 
 ############################## Fonction st_sommet
-### 
+###
 ### Cette fonction prend en entrée un paramètre tel que l'adresse d'une pile
 ### et renvoie la valeur de l'élément le plus récent (le sommet) de la pile.
-### 
+###
 ### Entrées : l'adresse de la pile ($a0)
 ### Sorties : la valeur du sommet de la pile ($v0)
-### 
+###
 ### Pré-conditions : La pile n'est pas vide
 ### Post-conditions : -
-### 
+###
 st_sommet:
 # prologue
 addi $sp, $sp, -12
@@ -314,16 +280,16 @@ jr $ra
 
 
 ############################## Fonction st_empiler
-### 
+###
 ### Cette fonction prend en entrée deux paramètres tel que l'adresse d'une pile
 ### et un entier. Elle modifie la pile en ajoutant l'entier donné au sommet de la pile.
-### 
+###
 ### Entrées : l'adresse de la pile ($a0), un entier à empiler ($a1)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : La pile n'est pas pleine
 ### Post-conditions : La pile donnée en argument est modifié
-### 
+###
 st_empiler:
 # prologue
 addi $sp, $sp, -20
@@ -353,16 +319,16 @@ jr $ra
 
 
 ############################## Fonction st_depiler
-### 
+###
 ### Cette fonction prend en entrée un paramètre tel que l'adresse d'une pile.
 ### Elle modifie la pile en supprimant le sommet de la pile.
-### 
+###
 ### Entrées : l'adresse de la pile ($a0)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : La pile n'est pas vide
 ### Post-conditions : La pile donnée en argument est modifié
-### 
+###
 st_depiler:
 # prologue
 addi $sp, $sp, -12
@@ -384,16 +350,16 @@ jr $ra
 
 
 ############################## Fonction st_afficher
-### 
+###
 ### Cette fonction prend en entrée un paramètre tel que l'adresse d'une pile.
 ### Elle affiche le contenu de la pile sur une ligne sans saut de ligne à la fin.
-### 
+###
 ### Entrées : l'adresse de la pile ($a0)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : -
 ### Post-conditions : Affichage des entiers sans saut de ligne
-### 
+###
 st_afficher:
 # prologue
 addi $sp, $sp, -16
@@ -430,16 +396,16 @@ jr $ra
 
 
 ############################## Fonction st_reinitialiser
-### 
+###
 ### Cette fonction prend en entrée un paramètre tel que l'adresse d'une pile.
-### Elle la dépile jusq'à ce qu'elle a 0 éléments.
-### 
+### Elle la dépile jusqu'à ce qu'elle a 0 éléments.
+###
 ### Entrées : l'adresse d'une pile ($a0)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : -
 ### Post-conditions : La pile est modifié
-### 
+###
 st_reinitialiser:
 # prologue
 addi $sp, $sp, -12
@@ -467,64 +433,74 @@ jr $ra
 
 
 ############################## Fonction creer_laby
-### 
+###
 ### Cette fonction prend en entrée un paramètre tel qu'un entier
 ### qui indique la taille en cellules des cotés d'un labyrinthe carré.
 ### Elle crée une pile et la remplit avec des cellules du labyrinthe
 ### qui sont entourés de murs chacune.
-### 
+###
 ### Entrées : un entier n pour le nombre de cellules d'un coté ($a0)
 ### Sorties : l'adresse de la pile représentant le labyrinthe ($v0)
-### 
+###
 ### Pré-conditions : n >= 2
 ### Post-conditions : -
-### 
+###
 creer_laby:
 # prologue
-addi $sp, $sp, -16
+addi $sp, $sp, -20
 sw $a0, 0($sp)
 sw $a1, 4($sp)
 sw $s0, 8($sp)
-sw $ra, 12($sp)
+sw $s1, 12($sp)
+sw $ra, 16($sp)
 # corps
 mul $a0, $a0, $a0			# calcul du nombre total de cellules -> $a0
+move $s1, $a0
+subi $s1, $s1, 1
+mul $s1, $s1, 256			# creer le masque binaire pour encoder l'indice d'une cellule dans le deuxième mot mémoire -> $s1
 move $s0, $a0				# compteur de la boucle Loop1 pour remplir la pile avec des cellules -> $s0
 subi $s0, $s0, 2			# on supprime 2 car les cellules d'entrée et de sortie sont empilés hors boucle -> $s0
 jal st_creer				# création de la pile de taille n x n
 move $a0, $v0				# l'adresse de la pile créée -> $a0
 li $a1, 47				# paramètre de la fonction st_empiler, sa valeur indique la cellule de sortie -> $a1
+or $a1, $a1, $s1			# encoder l'indice de la cellule dans son deuxième mot mémoire
+subi $s1, $s1, 256			# désincrementer l'indice de cellule -> $s1
 jal st_empiler				# la cellule de sortie empilée
-li $a1, 15				# paramètre de la fonction st_empiler, sa valeur indique des cellules autre que l'entrée et la sortie -> $a1
 Loop1_creer_laby:			# boucle pour remplir la pile des cellules autres que l'entrée et la sortie
 blez $s0, Exit_Loop1_creer_laby
+li $a1, 15				# paramètre de la fonction st_empiler, sa valeur indique des cellules autre que l'entrée et la sortie -> $a1
+or $a1, $a1, $s1			# encoder l'indice de la cellule dans son deuxième mot mémoire
+subi $s1, $s1, 256			# désincrementer l'indice de cellule -> $s1
 jal st_empiler				# empiler une cellule (n x n) - 2 fois
 subi $s0, $s0, 1			# décrémenter le compteur de boucle -> $s0
 b Loop1_creer_laby
 Exit_Loop1_creer_laby:
 li $a1, 31				# paramètre de la fonction st_empiler, sa valeur indique la cellule d'entrée -> $a1
+or $a1, $a1, $s1			# encoder l'indice de la cellule dans son deuxième mot mémoire (ici 0)
 jal st_empiler				# empiler la cellule d'entrée
 # épilogue
 lw $a0, 0($sp)
 lw $a1, 4($sp)
 lw $s0, 8($sp)
-lw $ra, 12($sp)
-addi $sp, $sp, 16
+lw $s1, 12($sp)
+lw $ra, 16($sp)
+addi $sp, $sp, 20
 jr $ra
 ####################
 
 
 
 ############################## Fonction afficher_laby
-### 
+###
 ### Cette fonction prend en paramètre l'adresse d'une pile
 ### qui représente un labyrinthe et affiche ce dernier.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : 2 <= taille d'une ligne ou colonne <= 99
 ### Post-conditions : Affichage des nombres
-### 
+###
 afficher_laby:
 # prologue
 addi $sp, $sp, -8
@@ -550,16 +526,16 @@ jr $ra
 
 
 ############################## Fonction afficher_taille_laby
-### 
+###
 ### Cette fonction prend en paramètre la taille d'un coté
 ### d'un labyrinthe et l'affiche sur la première ligne.
-### 
+###
 ### Entrées : la taille d'un coté d'un labyrinthe n ($a0)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : 0 <= n <= 99
 ### Post-conditions : Affichage des nombres
-### 
+###
 afficher_taille_laby:
 # prologue
 addi $sp, $sp, -8
@@ -587,17 +563,17 @@ jr $ra
 
 
 ############################## Fonction afficher_contenu_laby
-### 
+###
 ### Cette fonction prend en paramètre l'adresse d'une pile
 ### qui représente un labyrinthe et la longueur d'une de ses
 ### lignes. Elle affiche le labyrinthe ligne par ligne.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), la taille d'un coté n ($a1)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : 2 <= n <= 99
 ### Post-conditions : Affichage des nombres
-### 
+###
 afficher_contenu_laby:
 # prologue
 addi $sp, $sp, -16
@@ -654,16 +630,16 @@ jr $ra
 ############################## Fonction racine_carre
 ###
 ### Inspiré par https://www.educba.com/square-root-in-c/
-### 
+###
 ### Cette fonction prend la racine carré d'un entier
-### donné en paramètre. 
-### 
+### donné en paramètre.
+###
 ### Entrées : un entier n ($a0)
 ### Sorties : un entier r ($v0)
-### 
+###
 ### Pré-conditions : n >= 0
 ### Post-conditions : -
-### 
+###
 racine_carre:
 # prologue
 addi $sp, $sp, -16
@@ -694,17 +670,17 @@ jr $ra
 
 
 ############################## Fonction lecture_cellule
-### 
-### Cette fonction prend en paramètre deux arguments tels que l'adresse d'une 
-### pile qui représente un labyrinthe et l'indice d'une des cellules de ceci. 
+###
+### Cette fonction prend en paramètre deux arguments tels que l'adresse d'une
+### pile qui représente un labyrinthe et l'indice d'une des cellules de ceci.
 ### Elle renvoie la valeur de la cellule souhaité.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule n ($a1)
 ### Sorties : la valeur de la cellule ($v0)
-### 
+###
 ### Pré-conditions : 0 <= n <= taille maximale labyrinthe - 1
 ### Post-conditions : -
-### 
+###
 lecture_cellule:
 # prologue
 addi $sp, $sp, -16
@@ -737,17 +713,17 @@ jr $ra
 
 
 ############################## Fonction modifier_cellule
-### 
-### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une 
+###
+### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une
 ### pile qui représente un labyrinthe, l'indice d'une des cellules de ceci et
 ### un entier k. Elle remplace la valeur de la cellule souhaité par l'entier k.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule n ($a1), un entier k ($a2)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : 0 <= n <= taille maximale labyrinthe - 1, 0 <= k <= 99
 ### Post-conditions : La pile qui représente le labyrinthe est modifié
-### 
+###
 modifier_cellule:
 # prologue
 addi $sp, $sp, -20
@@ -768,7 +744,7 @@ jal st_depiler				# depiler pour arriver à un cas plus petit
 subi $a1, $a1, 1			# décrémenter l'indice de la cellule -> $a1
 jal modifier_cellule			# appel récursif pour continuer à dépiler jusqu'à retrouver la cellule recherché
 bltz $a1, Endif_modifier_cellule	# condition pour empiler que les cellules qui n'avaient pas l'indice n comme indice
-move $a1, $s0				# paramètre de la fonction st_empiler, le sommet -> $a0
+move $a1, $s0				# paramètre de la fonction st_empiler, le sommet -> $a1
 jal st_empiler				# empiler le sommet qui était dépilé avant
 Endif_modifier_cellule:
 # épilogue
@@ -784,19 +760,19 @@ jr $ra
 
 
 ############################## Fonction trouver_indice_cellule
-### 
-### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une 
+###
+### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une
 ### pile qui représente un labyrinthe, l'indice d'une des cellules de ceci et
 ### un entier d qui représente une direction tel que haut, bas, gauche, droite
 ### par 1, 2, 3, 4 respectivement. Elle renvoie l'indice de la cellule qui se
 ### situe dans la direction donnée en partant de la cellule donné.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule c ($a1), un entier pour une direction d ($a2)
 ### Sorties : l'indice d'une cellule ($v0)
-### 
+###
 ### Pré-conditions : 0 <= c <= taille maximale labyrinthe - 1, 1 <= d <= 4
 ### Post-conditions : S'il n'y a pas de cellule dans la direction demandé, la fonction renvoie -1
-### 
+###
 trouver_indice_cellule:
 # prologue
 addi $sp, $sp, -36
@@ -863,18 +839,18 @@ jr $ra
 
 
 ############################## Fonction trouver_voisin_cellule
-### 
-### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une 
+###
+### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une
 ### pile qui représente un labyrinthe, l'indice d'une des cellules de ceci et
 ### l'adresse d'une pile pour écrire les résultats.
 ### Elle remplit la pile avec les indices des cellules voisines à la cellule donnée.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule c ($a1), l'adresse d'une pile ($a2)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : 0 <= c <= taille maximale labyrinthe - 1, pile est de taille 4 et vide
 ### Post-conditions : La pile donnée est modifié. S'il n'y a pas de voisin, la pile renvoyée est vide.
-### 
+###
 trouver_voisin_cellule:
 # prologue
 addi $sp, $sp, -20
@@ -912,18 +888,18 @@ jr $ra
 
 
 ############################## Fonction trouver_voisin_non_visite_cellule
-### 
-### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une 
+###
+### Cette fonction prend en paramètre trois arguments tels que l'adresse d'une
 ### pile qui représente un labyrinthe, l'indice d'une des cellules de ceci et
 ### l'adresse d'une pile pour écrire les résultats.
 ### Elle remplit la pile avec les indices des cellules voisines non visitées à la cellule donnée.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule c ($a1), l'adresse d'une pile ($a2)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : 0 <= c <= taille maximale labyrinthe - 1, pile est de taille 4 et vide
 ### Post-conditions : La pile donnée est modifié. S'il n'y a pas de voisin non visité, la pile renvoyée est vide.
-### 
+###
 trouver_voisin_non_visite_cellule:
 # prologue
 addi $sp, $sp, -16
@@ -947,17 +923,17 @@ jr $ra
 
 
 ############################## Fonction enlever_voisin_visite_cellule
-### 
-### Cette fonction prend en paramètre deux arguments tels que l'adresse d'une 
+###
+### Cette fonction prend en paramètre deux arguments tels que l'adresse d'une
 ### pile qui représente un labyrinthe et l'adresse d'une pile qui contient des indices.
 ### Elle enleve les indices des cellules qui était visité de la pile.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'adresse d'une pile ($a1)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : -
 ### Post-conditions : La pile donnée est modifié. Si toutes les cellules étaient visité, la pile est vide.
-### 
+###
 enlever_voisin_visite_cellule:
 # prologue
 addi $sp, $sp, -20
@@ -1002,16 +978,16 @@ jr $ra
 
 
 ############################## Fonction tirer_hasard_cellule
-### 
+###
 ### Cette fonction prend en paramètre un argument tel que l'adresse d'une pile qui contient des indices.
 ### Elle choisit un indice au hasard et le renvoi.
-### 
-### Entrées : l'adresse d'une pile ($a0)
+###
+### Entrées : l'adresse d'une pile des indices ($a0)
 ### Sorties : l'indice d'une cellule ($v0)
-### 
+###
 ### Pré-conditions : -
 ### Post-conditions : Si la pile est vide, l'indice -1 est renvoyé
-### 
+###
 tirer_hasard_cellule:
 # prologue
 addi $sp, $sp, -16
@@ -1029,7 +1005,12 @@ bne $s0, 1, Elseif2_tirer_hasard_cellule	# condition pour vérifier si la pile n
 jal st_sommet					# si oui renvoie de cet élément -> $v0
 b Endif_tirer_hasard_cellule
 Elseif2_tirer_hasard_cellule:
-li $a0, 0					# borne inférieure pour le calcul d'un nombre aléatoire -> $a0
+li $v0, 30
+syscall
+la $v0, seed					# mettre le seed à l'horloge actuelle à chaque boucle
+sw $a0, 0($v0)
+sw $a1, 4($v0)
+li $a0, 0						# borne inférieure pour le calcul d'un nombre aléatoire -> $a0
 move $a1, $s0					# borne supérieure pour le calcul d'un nombre aléatoire -> $a1
 jal nombre_alea_entre_deux_bornes
 move $a1, $v0					# nombre aléatoire -> $a1
@@ -1048,18 +1029,18 @@ jr $ra
 
 
 ############################## Fonction marquer_visite_cellule
-### 
-### Cette fonction prend en paramètre deux arguments tel que 
+###
+### Cette fonction prend en paramètre deux arguments tel que
 ### l'adresse d'une pile qui représente un labyrinthe et
 ### l'indice d'une cellule de ceci.
 ### Elle marque la cellule comme visité.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule n ($a1)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : 0 <= n <= taille du labyrinthe - 1
 ### Post-conditions : -
-### 
+###
 marquer_visite_cellule:
 # prologue
 addi $sp, $sp, -20
@@ -1092,19 +1073,19 @@ jr $ra
 
 
 ############################## Fonction casser_mur_direction
-### 
+###
 ### Cette fonction prend en paramètre deux arguments tel qu'un entier
 ### qui représente une cellule et un entier qui représente une direction
 ### tel que haut, bas, gauche, droite par 1, 2, 3, 4 respectivement.
 ### Elle casse le mur de la cellule dans la direction indiqué en modifiant
 ### le bit représentant et renvoie le nouvel entier.
-### 
+###
 ### Entrées : un entier d'une cellule c ($a0), un entier d'une direction d ($a1)
 ### Sorties : un entier d'une cellule ($v0)
-### 
+###
 ### Pré-conditions : 0 <= c <= 99, 1 <= d <= 4
 ### Post-conditions : -
-### 
+###
 casser_mur_direction:
 # prologue
 addi $sp, $sp, -12
@@ -1142,17 +1123,17 @@ jr $ra
 
 
 ############################## Fonction casser_mur_cellule
-### 
-### Cette fonction prend en paramètre trois arguments tel que 
+###
+### Cette fonction prend en paramètre trois arguments tel que
 ### l'adresse d'une pile qui représente un labyrinthe, l'indice de deux cellules de ceci.
 ### Elle casse le mur entre ces deux cellules en mettant le bit représentatif à 0.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'indice d'une cellule n1 ($a1), l'indice d'une cellule n2 ($a2)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : 0 <= n1 != n2 <= taille du labyrinthe - 1, les deux cellules sont voisines
 ### Post-conditions : -
-### 
+###
 casser_mur_cellule:
 # prologue
 addi $sp, $sp, -40
@@ -1294,17 +1275,17 @@ jr $ra
 
 
 ############################## Fonction generer_laby
-### 
-### Cette fonction prend en paramètre deux arguments tel que 
+###
+### Cette fonction prend en paramètre deux arguments tel que
 ### l'adresse d'une pile qui représente un labyrinthe et une pile de 4 entiers pour les voisins.
 ### Elle génére le labyrinthe aléatoire en modifiant les murs des cellules.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0), l'adresse d'une pile ($a1)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : la première cellule est marqué visité
 ### Post-conditions : -
-### 
+###
 generer_laby:
 # prologue
 addi $sp, $sp, -24
@@ -1317,30 +1298,52 @@ sw $ra, 20($sp)
 # corps
 move $s0, $a0					# copier l'adresse de la pile pour ne pas l'écraser -> $s0
 lw $a0, 0($s0)					# charger le nombre total de cellules du labyrinthe -> $a0
-jal racine_carre				# calcul de la racine carré du nombre total de cellules pour trouver la taille d'une ligne
-move $s1, $v0					# taille d'une ligne du labyrinthe -> $s1
+jal st_creer					# créer la pile décrit dans l'algorithme -> $v0
+move $s0, $v0
 lw $a0, 0($sp)
-lw $s0, 4($a0)
-sub $s1, $s0, $s1				# limite boucle : nombre total de cellule - nombre de cellule sur une ligne -> $s1
-li $s0, 0					# compteur boucle -> $s0
+li $a1, 0
+jal marquer_visite_cellule		# marquer la cellule de l'indice 0 visité
+jal lecture_cellule
+move $a1, $v0
+move $a0, $s0
+jal st_empiler					# empiler la cellule marqué visité de l'indice 0
 lw $a0, 0($sp)
+lw $a1, 4($sp)
 Loop_generer_laby:
-bge $s0, $s1, Exit_Loop_generer_laby
-move $a1, $s0
-jal marquer_visite_cellule
+lw $s1, 4($s0)
+beq $s1, 0, Exit_Loop_generer_laby	# tant que la pile n'est pas vide, continuer l'algorithme
+move $a0, $s0
+jal st_sommet					# sommet de la pile de l'algorithme (cellule courante) -> $v0
+li $s1, 255
+not $s1, $s1
+and $s1, $v0, $s1
+div $s1, $s1, 256				# extraire l'indice de la cellule courante -> $s1
 lw $a0, 4($sp)
 jal st_reinitialiser
 lw $a0, 0($sp)
+move $a1, $s1					# utiliser l'indice extrait de la cellule courante pour trouver ses voisins -> $a1
 lw $a2, 4($sp)
 jal trouver_voisin_non_visite_cellule
 move $a0, $a2
 jal tirer_hasard_cellule
+beq $v0, -1, Else_generer_laby	# tester si le choix au hasard s'est bien passé (il y avait des voisins non visités)
+If_generer_laby:
 lw $a0, 0($sp)
 move $a2, $v0
-jal casser_mur_cellule
+jal casser_mur_cellule			# casser mur entre cellule courante et voisin non visité chosit au hasard
 move $a1, $a2
-jal marquer_visite_cellule
-addi $s0, $s0, 1
+jal marquer_visite_cellule		# marquer visité la cellule choisi au hasard
+jal lecture_cellule
+move $a0, $s0
+move $a1, $v0
+jal st_empiler					# empiler la cellule choisi au hasard
+b Endif_generer_laby
+Else_generer_laby:
+move $a0, $s0
+jal st_depiler					# depiler la pile de l'algorithme s'il ne reste plus de voisin non visité pour la cellule courante
+Endif_generer_laby:
+lw $a0, 0($sp)
+lw $a1, 4($sp)
 b Loop_generer_laby
 Exit_Loop_generer_laby:
 # épilogue
@@ -1357,25 +1360,26 @@ jr $ra
 
 
 ############################## Fonction nettoyer_laby
-### 
-### Cette fonction prend en paramètre un argument tel que 
+###
+### Cette fonction prend en paramètre un argument tel que
 ### l'adresse d'une pile qui représente un labyrinthe.
 ### Elle fait le nettoyage en mettant les 6e bits des cellules à zéro.
-### 
+###
 ### Entrées : l'adresse d'un labyrinthe ($a0)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : Toutes les cellules ont été marqué visité
 ### Post-conditions : -
-### 
+###
 nettoyer_laby:
 # prologue
-addi $sp, $sp, -20
+addi $sp, $sp, -24
 sw $a0, 0($sp)
 sw $a1, 4($sp)
 sw $a2, 8($sp)
 sw $s0, 12($sp)
-sw $ra, 16($sp)
+sw $s1, 16($sp)
+sw $ra, 20($sp)
 # corps
 lw $s0, 4($a0)
 subi $s0, $s0, 1
@@ -1383,7 +1387,7 @@ Loop_nettoyer_laby:
 bltz $s0, Exit_Loop_nettoyer_laby
 move $a1, $s0
 jal lecture_cellule
-subi $v0, $v0, 64
+and $v0, $v0, 63		# effacer tous les bits sauf les 6 premiers
 move $a2, $v0
 jal modifier_cellule
 subi $s0, $s0, 1
@@ -1394,24 +1398,25 @@ lw $a0, 0($sp)
 lw $a1, 4($sp)
 lw $a2, 8($sp)
 lw $s0, 12($sp)
-lw $ra, 16($sp)
-addi $sp, $sp, 20
+lw $s1, 16($sp)
+lw $ra, 20($sp)
+addi $sp, $sp, 24
 jr $ra
 ####################
 
 
 
 ############################## Fonction demarrer_laby
-### 
+###
 ### Cette fonction prend en paramètre un argument tel que la taille d'un coté du labyrinthe.
 ### Elle génére le labyrinthe et l'affiche.
-### 
+###
 ### Entrées : un entier n ($a0)
 ### Sorties : -
-### 
+###
 ### Pré-conditions : 2 < n <= 5
 ### Post-conditions : Affichage d'entiers
-### 
+###
 demarrer_laby:
 # prologue
 addi $sp, $sp, -20
@@ -1425,12 +1430,8 @@ jal creer_laby
 move $s0, $v0			# l'adresse du labyrinthe -> $s0
 li $a0, 4
 jal st_creer
-move $s1, $v0			# l'adresse de la pile pour mettre les indices des voisins -> $s1
+move $a1, $v0			# l'adresse de la pile pour mettre les indices des voisins -> $a1
 move $a0, $s0
-li $a1, 0
-jal marquer_visite_cellule
-move $a0, $s0
-move $a1, $s1
 jal generer_laby
 jal nettoyer_laby
 jal afficher_laby
