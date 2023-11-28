@@ -1,48 +1,57 @@
-# Projet d'Architecture S3 (2022-2023)
+# Project Labyrinth
+
+[![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
+[![fr](https://img.shields.io/badge/lang-fr-yellow.svg)](README.fr.md)
+
+This is project Labyrinth. It is a random square labyrinth generator of a given size with one and only one solution. It is written in MIPS assembly and runs in the MARS simulator. It generates a random labyrinth at each execution with a unique solution.
+
+![Output of a random labyrinth in the terminal](showcase.png)
 
 ## Introduction
 
-Ceci est le projet labyrinthe réalisé dans le cadre de l'UE "Architecture des Ordinateurs" du semestre 3 de l'année universitaire 2022-23. Il a été fait dans **6 jours** pendant les vacances de la semaine du 31 octobre pour être rendu le dimanche 6 novembre. 😳
+This project was made for the "Computer Architecture" class of semestre 3 of the Computer Science degree of the University of Strasbourg, during the school year of 2022-23. It was made in **6 days** during the week of holiday starting on October 31st to be turned in Sunday November 6th. 😳
 
-Le fichier rendu du projet est celui nommé `labyrinthe.s` contenant du code source assembleur MIPS. Il est à executer avec le simulateur MARS inclus.
+The file that was turned in for the project is named `labyrinthe.s` containing the MIPS assembly source code. It is to be run with the [MARS](http://courses.missouristate.edu/KenVollmar/MARS/) simulator included.
 
-Avec le [pdf du sujet](https://git.unistra.fr/erken/labyrinthe/-/blob/master/ProjetArchi.pdf) vous pouvez vous renseigner sur le projet. Malheureusement d'un point de vue optimisation, complexité et efficacité, il n'est pas le meilleur même si j'ai suivi avec précision la progression conseillée.
+With the [pdf of the subject](https://git.unistra.fr/erken/labyrinthe/-/blob/master/ProjetArchi.pdf) (in French) you can learn about the project. Sadly from an optimisation, complexity and efficiency standpoint, it is not the best even though I followed the suggested progression with precision.
 
-### Correction finale (14.11.2023)
+### Final fix (11.14.2023)
 
-Au moment de rendu de ce projet le 06.11.2022, pour plusieurs raisons (contrainte de temps sévère, être un dévéloppeur novice sans beaucoup de vision...), je n'avais pas pu réussir les demandes du sujet et le spec à 100%. Notamment, j'avais remplacé l'algorithme décrit dans le sujet par un plus simple par fausse impression et peur de complexité et temps d'execution inenvisageable. Mais au moment je me suis rendu compte qu'en fait il n'y avait pas de problème, c'était trop tard pour reécrire des parties pour implementer l'algorithme proposé comme tel et se débarasser des déviations introduits par rapport au sujet.
+At the time when I turned in this project on 11.06.2022, for various reasons (severe time limitations, being a novice developer without much vision...), I couldn't get all that was asked in the subject and the spec a 100% right. Notably, I had replaced the described algorithm in the subject by another simpler one by a false impression and worry of complexity and unimaginable execution times. But at the time when I found out that actually there was no problem, it was too late to rewrite some parts to implement the suggested algorithm as is and get rid of the deviations introduced compared to the subject.
 
-Cette différence dans le choix d'algorithme était la raison pour laquelle la sortie (le labyrinthe aléatoire généré à une unique solution) n'était même pas proche des exemples dans le sujet. Pourtant jusqu'à l'étape finale qui était la sortie, tous les autres systèmes internes marchait sans soucis. Mais à cet époque là je pensais le problème plus grand et plus compliqué que juste la différence dans l'algorithme.
+This difference in the algorithm choice was the reason for which the output (the randomly generated labyrinth with a unique solution) was not even close to the examples in the subject. Although everything until the final step which was the output, all the other internal systems were working without any issue. But at that time I was thinking the problem was bigger and more complicated than just the difference in the algorithms.
 
-Le fait que je n'avais pas pu fournir un résultat au spec, principalement à cause de la contrainte de temps me dérangait depuis que j'avais rendu le projet. Mais malheureusement l'année scolaire continuait à toute vitesse et je ne pouvais pas revenir à ce projet pour le laisser dans un état correcte et complet.
+The fact that I couldn't provide a result up to spec, mainly due to time limitations was annoying me since I had turned in the project. But sadly the school year was moving on at full speed and I couldn't come back to this project to leave it in a correct and complete state.
 
-Mais, me voici 💪, de retour le 14.11.2023 (après exactement un an, quelle coïncidence 🤔) pour ne pas laisser mes efforts en vain, ayant accumulé plus de connaissances et de l'éxperience en informatique (maintenant en L3) pour corriger le passé. Un dernier effort, pour laisser ce projet reposer en paix, ça le mérite... 🫡
+But here I am 💪, back again on 11.14.2023 (after exactly a year, what a coincidence 🤔) to not let my efforts be in vain, having accumulated more knowledge and experience in computer science (now in my senior (3rd) year) to correct the past. One last effort, to let this project rest in peace, it deserves it... 🫡
 
-Les quelques petits changements (surprenant comment c'était simple en fait) que j'ai fait sont les suivants :
+The few small changes (surprising how they were actually simple) that I've done are the following:
 
-* Changer le seed pour le générateur pseudo aléatoire dans `Alea.s` par l'horloge système à chaque appel pour avoir un génération de labyrinthe correctement aléatoire.
-* Remplacer l'algorithme complétement par celui dans le sujet situé dans la fonction `generer_laby`.
-  * Utiliser le deuxième octet des mots mémoire qui stockent les cellules du labyrinthe pour stocker les indices des cellules dans les cellules sans autre structure de donnée (bits numéro 8+). (Extension au sujet du projet parce que je suis paresseux pour faire plus, mon but n'est rien d'autre à ce moment là de rendre le projet fonctionnel)
-  * Corriger et simplifier la fonction `cell_mettre_bit_a0` pour que cela ne touche pas les autres bits que concerné. (Pour que la solution du point précedent marche)
-  * Améliorer la fonction `creer_laby` pour créer le labyrinthe initial mais avec les indices encodés dans les cellules correspondantes.
-  * Corriger la fonction `nettoyer_laby` pour mettre à 0 tous les bits de chaque cellule sauf les 6 premiers.
+* Change the seed for the pseudo random generator in `Alea.s` with the system clock at each call to have a correctly random labyrinth generation.
+* Replace the algorithm completely with the one in the subject found in the function `generer_laby`. (My deviated algorithm traversed the labyrinth cells linearly one time choosing each time a not visited neighbor for each cell and break the wall between these two. Of course this was not ensuring a random labyrinth with a unique solution like asked in the spec. So I replaced the algorithm with the one suggested in the subject word for word. Put the first cell of the labyrinth in a stack while marking it visited. While the stack is not empty take the top of the stack and make it the current cell, look for its not visited neighbors, pick one at random if there are any, break the wall between these two cells, push the neighbor into the stack, if the current cell has no neighbors left unvisited then pop.)
+  * Use the second byte of the memory words that store the cells of the labyrinth to store the cell's index in the cell itself, without another data structure (bits number 8+) in the stack representing the labyrinth. (Extension to the project subject since I'm lazy to do more, my goal is nothing but to make this project functional at this point)
+  * Fix and simplify the function `cell_mettre_bit_a0` so that it doesn't touch any other bits than the one given. (So that the solution in the previous point works)
+  * Improve the function `creer_laby` to create an initial labyrinth but with the indices encoded in the corresponding cells.
+  * Fix the function `nettoyer_laby` to put all the bits to 0 for each cell except the first 6.
 
-Ces changements ne font que rendre le projet fonctionnel avec la sortie et le fonctionnement désormais correspondant au spec. Mais ce n'est toujours pas sa version ultime : le plus lisible, le mieux documenté ou le plus optimisé. Peu importe, ça marche et ça marche bien. C'était un drôle de défi amusant qui m'a fait bien réfléchir, et c'est ce qui compte. J'ai beaucoup appris grâce à ce projet.
+These changes do no more than make the project functional with the output and the functioning now up to spec. But this is still not its ultimate version: the most readable, the best documented or the most optimized. Doesn't matter though, it works and it works well. It was an enjoyable fun challenge that made me think, and that's what matters. I learned a lot thanks to this project.
 
-Il existe un rapport de projet (`Rapport.pdf`) dans l'itération de [rendu officel](https://git.unistra.fr/erken/labyrinthe/-/tree/Rendu_Final) pour vous renseigner sur les difficultés que j'ai eu et les choix d'implémentation lors de mon travail initial sur ce projet. Jetez un oeil à cette version pour voir ce projet dans son état au moment du rendu officiel.
+There is also a report paper for the project (`Rapport.pdf`) in the [official turn in](https://git.unistra.fr/erken/labyrinthe/-/tree/Rendu_Final) (in French) iteration to inform you about the difficulties that I had and my implementation choices during my initial work on this project. Take a look at this version to see the project in its state at the time of the official turn in.
 
-## Commandes à utiliser pour l'execution
+## How to run
 
-Dans un premier temps rendez le shell script "print_maze.sh" executable par :
+First off make the shell script `print_maze.sh` executable (if it's not already the case) by:
 
 ```bash
 chmod u+x print_maze.sh
 ```
 
-Puis, executer ces deux lignes de commandes en mettant la taille que vous voulez dans l'intervalle **[2; 9]**:
+Then, run these two commands by putting the desired size you want inside the **[2; 9]** range:
 
 ```bash
-java -jar Mars4_5.jar p me labyrinthe.s pa {taille du labyrinthe} > laby.txt
+java -jar Mars4_5.jar p me labyrinthe.s pa {size of the labyrinth} > laby.txt
 
 ./print_maze.sh laby.txt
 ```
+
+You have to have a version of `java` compatible with MARS installed and present on your `$PATH`. The [MARS documentation](http://courses.missouristate.edu/KenVollmar/MARS/Help/MarsHelpIntro.html) suggests the following on the necessary version of Java: "MARS is written in Java and requires at least **Release 1.5** of the J2SE Java Runtime Environment (**JRE**) to work."
