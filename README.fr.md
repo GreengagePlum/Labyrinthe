@@ -9,7 +9,7 @@ Ceci est le projet Labyrinthe. Il s'agit d'un générateur de labyrinthe carré 
 
 ## Introduction
 
-Ce projet a été réalisé dans le cadre de l'UE "Architecture des Ordinateurs" du semestre 3 de la licence Informatique de l'Université de Strasbourg, durant l'année universitaire 2022-23. Il a été fait dans **6 jours** pendant les vacances de la semaine du 31 octobre pour être rendu le dimanche 6 novembre. 😳
+Ce projet a été réalisé dans le cadre de l'UE "Architecture des Ordinateurs" du semestre 3 de la licence Informatique à l'Université de Strasbourg, durant l'année universitaire 2022-23. Il a été fait dans **6 jours** pendant les vacances de la semaine du 31 octobre pour être rendu le dimanche 6 novembre. 😳
 
 Le fichier rendu du projet est celui nommé `labyrinthe.s` contenant du code source assembleur MIPS. Il est à executer avec le simulateur [MARS](http://courses.missouristate.edu/KenVollmar/MARS/) inclus.
 
@@ -27,20 +27,20 @@ Mais, me voici 💪, de retour le 14.11.2023 (après exactement un an, quelle co
 
 Les quelques petits changements (surprenant comment c'était simple en fait) que j'ai fait sont les suivants :
 
-* Changer le seed pour le générateur pseudo aléatoire dans `Alea.s` par l'horloge système à chaque appel pour avoir un génération de labyrinthe correctement aléatoire.
+* Changer le seed pour le générateur pseudo aléatoire fourni dans `Alea.s` par l'horloge système à chaque appel pour avoir un génération de labyrinthe correctement aléatoire.
 * Remplacer l'algorithme complètement par celui dans le sujet situé dans la fonction `generer_laby`. (Mon algorithme dévié parcourait les cellules du labyrinthe linéairement une seule fois en choisissant à chaque fois un voisin non visité pour chaque cellule et casser le mur entre ces deux. Bien sûr que cela ne garantissait pas un labyrinthe aléatoire à une unique solution comme demandé dans le spec. Alors j'ai remplacé l'algorithme par celui proposé dans le sujet mot à mot. Mettre la première cellule du labyrinthe dans une pile en la marquant visité. Tant que la pile n'est pas vide faire de la tête de la pile la cellule courante, rechercher ses voisins non visités, en choisir un au hasard s'il y en a, casser le mur entre ces deux cellules, empiler ce voisin, si la cellule courante n'a plus de voisin non visité alors dépiler.)
-  * Utiliser le deuxième octet des mots mémoire qui stockent les cellules du labyrinthe pour stocker les indices des cellules dans les cellules mêmes, sans autre structure de donnée (bits numéro 8+) dans la pile représentant le labyrinthe. (Extension au sujet du projet parce que je suis paresseux pour faire plus, mon but n'est rien d'autre à ce moment là de rendre le projet fonctionnel)
+  * Utiliser le deuxième octet des mots mémoire qui stockent les cellules du labyrinthe pour stocker les indices des cellules dans les cellules mêmes, sans autre structure de donnée (bits numéro 8+) dans la pile représentant le labyrinthe. (Extension au sujet du projet parce que je suis paresseux pour faire plus, mon but n'est rien d'autre à ce moment là de rendre le projet fonctionnel. Normalement je ne suis pas censé utiliser plus de 8 bits pour représenter les cellules)
   * Corriger et simplifier la fonction `cell_mettre_bit_a0` pour que cela ne touche pas les autres bits que concerné. (Pour que la solution du point precedent marche)
   * Améliorer la fonction `creer_laby` pour créer le labyrinthe initial mais avec les indices encodés dans les cellules correspondantes.
   * Corriger la fonction `nettoyer_laby` pour mettre à 0 tous les bits de chaque cellule sauf les 6 premiers.
 
 Ces changements ne font que rendre le projet fonctionnel avec la sortie et le fonctionnement désormais correspondant au spec. Mais ce n'est toujours pas sa version ultime : le plus lisible, le mieux documenté ou le plus optimisé. Peu importe, ça marche et ça marche bien. C'était un drôle de défi amusant qui m'a fait bien réfléchir, et c'est ce qui compte. J'ai beaucoup appris grâce à ce projet.
 
-Il existe un rapport de projet (`Rapport.pdf`) dans l'itération de [rendu officiel](https://git.unistra.fr/erken/labyrinthe/-/tree/Rendu_Final) pour vous renseigner sur les difficultés que j'ai eu et les choix d'implémentation lors de mon travail initial sur ce projet. Jetez un œil à cette version pour voir ce projet dans son état au moment du rendu officiel.
+Il existe un rapport de projet (`Rapport.pdf`) dans l'itération de [rendu officiel](https://git.unistra.fr/erken/labyrinthe/-/tree/Rendu_Final) pour vous renseigner sur les difficultés que j'ai eu et les choix d'implémentation lors de mon travail initial sur ce projet. Jetez un œil à cette version pour voir ce projet dans son état au moment du rendu officiel le 6 novembre 2022.
 
 ## Commandes à utiliser pour l'exécution
 
-Dans un premier temps rendez le shell script `print_maze.sh` executable (si ce n'est déjà le cas) par :
+Dans un premier temps, rendez le shell script `print_maze.sh` executable (si ce n'est déjà le cas) par :
 
 ```bash
 chmod u+x print_maze.sh
