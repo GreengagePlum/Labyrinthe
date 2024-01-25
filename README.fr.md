@@ -13,7 +13,7 @@ Ce projet a été réalisé dans le cadre de l'UE "Architecture des Ordinateurs"
 
 Le fichier rendu du projet est celui nommé `labyrinthe.s` contenant du code source assembleur MIPS. Il est à executer avec le simulateur [MARS](http://courses.missouristate.edu/KenVollmar/MARS/) inclus.
 
-Avec le [pdf du sujet](https://git.unistra.fr/erken/labyrinthe/-/blob/master/ProjetArchi.pdf) vous pouvez vous renseigner sur le projet. Malheureusement d'un point de vue optimisation, complexité et efficacité, il n'est pas le meilleur même si j'ai suivi avec précision la progression conseillée.
+Avec le [pdf du sujet](https://github.com/GreengagePlum/Labyrinthe/blob/master/ProjetArchi.pdf) vous pouvez vous renseigner sur le projet. Malheureusement d'un point de vue optimisation, complexité et efficacité, il n'est pas le meilleur même si j'ai suivi avec précision la progression conseillée.
 
 ### Correction finale (14.11.2023)
 
@@ -36,7 +36,7 @@ Les quelques petits changements (surprenant comment c'était simple en fait) que
 
 Ces changements ne font que rendre le projet fonctionnel avec la sortie et le fonctionnement désormais correspondant au spec. Mais ce n'est toujours pas sa version ultime : le plus lisible, le mieux documenté ou le plus optimisé. Peu importe, ça marche et ça marche bien. C'était un drôle de défi amusant qui m'a fait bien réfléchir, et c'est ce qui compte. J'ai beaucoup appris grâce à ce projet.
 
-Il existe un rapport de projet (`Rapport.pdf`) dans l'itération de [rendu officiel](https://git.unistra.fr/erken/labyrinthe/-/tree/Rendu_Final) pour vous renseigner sur les difficultés que j'ai eu et les choix d'implémentation lors de mon travail initial sur ce projet. Jetez un œil à cette version pour voir ce projet dans son état au moment du rendu officiel le 6 novembre 2022.
+Il existe un rapport de projet (`Rapport.pdf`) dans l'itération de [rendu officiel](https://github.com/GreengagePlum/Labyrinthe/tree/Rendu_Final) pour vous renseigner sur les difficultés que j'ai eu et les choix d'implémentation lors de mon travail initial sur ce projet. Jetez un œil à cette version pour voir ce projet dans son état au moment du rendu officiel le 6 novembre 2022.
 
 ## Commandes à utiliser pour l'exécution
 

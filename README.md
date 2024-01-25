@@ -13,7 +13,7 @@ This project was made for the 3rd semester "Computer Architecture" class of the 
 
 The file that was turned in for the project is named `labyrinthe.s` containing the MIPS assembly source code. It is to be run with the [MARS](http://courses.missouristate.edu/KenVollmar/MARS/) simulator included.
 
-With the [pdf of the subject](https://git.unistra.fr/erken/labyrinthe/-/blob/master/ProjetArchi.pdf) (in French) you can learn about the project. Sadly from an optimization, complexity and efficiency standpoint, it is not the best even though I followed the suggested progression with precision.
+With the [pdf of the subject](https://github.com/GreengagePlum/Labyrinthe/blob/master/ProjetArchi.pdf) (in French) you can learn about the project. Sadly from an optimization, complexity and efficiency standpoint, it is not the best even though I followed the suggested progression with precision.
 
 ### Final fix (11.14.2023)
 
@@ -36,7 +36,7 @@ The few small changes (surprising how they were actually simple) that I've done 
 
 These changes do no more than make the project functional with the output and the functioning now up to spec. But this is still not its ultimate version: the most readable, the best documented or the most optimized. Doesn't matter though, it works and it works well. It was an enjoyable fun challenge that made me think, and that's what matters. I learned a lot thanks to this project.
 
-There is also a report paper for the project named `Rapport.pdf` in the [official turn in](https://git.unistra.fr/erken/labyrinthe/-/tree/Rendu_Final) iteration (in French) to inform you about the difficulties that I had and my implementation choices during my initial work on this project. Take a look at this version to see the project in its state at the time of the official turn in that was on November 6th 2022.
+There is also a report paper for the project named `Rapport.pdf` in the [official turn in](https://github.com/GreengagePlum/Labyrinthe/tree/Rendu_Final) iteration (in French) to inform you about the difficulties that I had and my implementation choices during my initial work on this project. Take a look at this version to see the project in its state at the time of the official turn in that was on November 6th 2022.
 
 ## How to run
 
